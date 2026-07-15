@@ -1,0 +1,4 @@
+<resources>
+  <string name="workout_channel_name">Active workout</string>
+  <string name="workout_channel_description">Jump count and workout controls</string>
+</resources>

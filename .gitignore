@@ -1,0 +1,55 @@
+# Keep this repository file trackable even if a global rule ignores it.
+!.gitignore
+
+# Gradle and Kotlin build state
+.gradle/
+**/.gradle/
+**/build/
+.kotlin/
+bin/
+gen/
+
+# Compiled Android/JVM artifacts outside normal build directories
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Android Studio and IntelliJ IDEA
+.idea/
+*.iml
+out/
+.classpath
+.project
+.settings/
+
+# Android SDK and machine-local configuration
+local.properties
+
+# Signing credentials and local secrets
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+.env
+.env.*
+
+# Native build output
+.externalNativeBuild/
+.cxx/
+.navigation/
+
+# Device captures and profiler dumps
+captures/
+*.hprof
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*~
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db

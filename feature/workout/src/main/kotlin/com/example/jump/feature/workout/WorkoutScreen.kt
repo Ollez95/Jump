@@ -1,0 +1,134 @@
+package com.example.jump.feature.workout
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import com.example.jump.core.designsystem.component.JumpBadge
+import com.example.jump.core.designsystem.component.JumpBrandMark
+import com.example.jump.core.designsystem.component.JumpCard
+import com.example.jump.core.designsystem.component.JumpCounterOrb
+import com.example.jump.core.designsystem.component.JumpInfoBanner
+import com.example.jump.core.designsystem.component.JumpMetric
+import com.example.jump.core.designsystem.component.JumpPrimaryButton
+import com.example.jump.core.designsystem.component.JumpScreen
+import com.example.jump.core.designsystem.component.JumpSecondaryButton
+import com.example.jump.core.designsystem.component.formatDuration
+import com.example.jump.core.model.ActiveWorkoutState
+import com.example.jump.core.model.SessionPhase
+import com.example.jump.core.workout.WorkoutController
+import com.example.jump.core.workout.WorkoutCoordinator
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class WorkoutViewModel @Inject constructor(
+  coordinator: WorkoutCoordinator,
+  private val controller: WorkoutController,
+) : ViewModel() {
+  val state = coordinator.state
+  private val workoutCoordinator = coordinator
+  fun togglePause() = controller.togglePause()
+  fun finish() = controller.stop()
+  fun correct(jumps: Int) = viewModelScope.launch { workoutCoordinator.correctJumps(jumps) }
+  fun clear() = workoutCoordinator.clear()
+}
+
+@Composable
+fun WorkoutRoute(onDone: () -> Unit, viewModel: WorkoutViewModel = hiltViewModel()) {
+  val state by viewModel.state.collectAsStateWithLifecycle()
+  WorkoutScreen(state, viewModel::togglePause, viewModel::finish, viewModel::correct) { viewModel.clear(); onDone() }
+}
+
+@Composable
+fun WorkoutScreen(state: ActiveWorkoutState, onTogglePause: () -> Unit, onFinish: () -> Unit, onCorrect: (Int) -> Unit, onDone: () -> Unit) {
+  if (state.phase == SessionPhase.COMPLETED) { CompletionScreen(state, onCorrect, onDone); return }
+  val phaseLabel = when (state.phase) {
+    SessionPhase.PREPARING -> "GET READY"
+    SessionPhase.ACTIVE -> if (state.calibrationRemainingMillis > 0) "CALIBRATING • KEEP JUMPING" else "JUMP"
+    SessionPhase.RESTING -> "REST"
+    SessionPhase.PAUSED -> "PAUSED"
+    else -> "WORKOUT"
+  }
+  JumpScreen {
+    Column(Modifier.fillMaxSize().padding(horizontal = 22.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween) {
+      Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          JumpBrandMark(Modifier.size(44.dp))
+          Column(Modifier.weight(1f)) {
+            Text(state.plan?.title.orEmpty(), style = MaterialTheme.typography.titleLarge)
+            Text("LIVE WORKOUT", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+          JumpBadge(phaseLabel)
+        }
+        if (!state.sensorAvailable) {
+          JumpInfoBanner("Manual timing", "No accelerometer was found, so timing will continue without automatic counting.", isError = true)
+        }
+      }
+      Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        JumpCounterOrb("${state.detectedJumps}", "Jumps")
+        Text(
+          if (state.phase == SessionPhase.PREPARING) "${(state.intervalRemainingMillis + 999) / 1_000}" else formatDuration(state.intervalRemainingMillis.takeIf { it < 86_400_000 } ?: state.elapsedMillis),
+          style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+          if (state.phase == SessionPhase.PREPARING) "Starting in seconds" else "Current interval",
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      JumpCard {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+          JumpMetric("Pace", "${state.currentPace}", "jpm", Modifier.weight(1f))
+          JumpMetric("Streak", "${state.longestStreak}", "best", Modifier.weight(1f))
+          JumpMetric("Time", formatDuration(state.elapsedMillis), "elapsed", Modifier.weight(1f))
+        }
+      }
+      Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        JumpPrimaryButton(if (state.phase == SessionPhase.PAUSED) "Resume" else "Pause", onTogglePause, Modifier.fillMaxWidth(), enabled = state.phase != SessionPhase.PREPARING)
+        JumpSecondaryButton("Finish and save", onFinish, Modifier.fillMaxWidth())
+      }
+    }
+  }
+}
+
+@Composable
+private fun CompletionScreen(state: ActiveWorkoutState, onCorrect: (Int) -> Unit, onDone: () -> Unit) {
+  JumpScreen {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+      JumpBadge("MOMENTUM BUILT")
+      Text("Nice work.", style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(top = 14.dp))
+      Text("Another session is in the bank.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+      JumpCounterOrb("${state.correctedJumps}", "Total jumps", Modifier.padding(top = 28.dp))
+      Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(vertical = 18.dp)) {
+        JumpSecondaryButton("− 1", { onCorrect(state.correctedJumps - 1) }, Modifier.weight(1f))
+        JumpSecondaryButton("+ 1", { onCorrect(state.correctedJumps + 1) }, Modifier.weight(1f))
+      }
+      JumpCard {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+          JumpMetric("Detected", "${state.detectedJumps}", "jumps", Modifier.weight(1f))
+          JumpMetric("Time", formatDuration(state.elapsedMillis), "elapsed", Modifier.weight(1f))
+          JumpMetric("Pace", "${state.bestPace}", "best jpm", Modifier.weight(1f))
+        }
+      }
+      JumpPrimaryButton("Back to today", onDone, Modifier.fillMaxWidth().padding(top = 22.dp))
+    }
+  }
+}

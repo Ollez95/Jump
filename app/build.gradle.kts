@@ -2,6 +2,8 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.hilt)
 }
 
 android {
@@ -81,4 +83,17 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+  implementation(project(":core:model"))
+  implementation(project(":core:data"))
+  implementation(project(":core:designsystem"))
+  implementation(project(":core:workout"))
+  implementation(project(":feature:onboarding"))
+  implementation(project(":feature:home"))
+  implementation(project(":feature:workout"))
+  implementation(project(":feature:history"))
+  implementation(project(":feature:settings"))
+  implementation(libs.dagger.hilt.android)
+  implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+  ksp(libs.dagger.hilt.compiler)
 }
