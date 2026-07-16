@@ -1,27 +1,5 @@
 package com.example.jump.core.camera
 
-data class CameraPoseFrame(
-  val bodyCenterY: Float,
-  val confidence: Float,
-  val timestampMillis: Long,
-  /** Shoulder-to-hip height as a fraction of the upright image height. */
-  val bodyScale: Float = DEFAULT_BODY_SCALE,
-)
-
-private const val DEFAULT_BODY_SCALE = 0.24f
-
-enum class CameraTrackingState {
-  CALIBRATING,
-  TRACKING,
-  PERSON_NOT_VISIBLE,
-  CAMERA_ERROR,
-}
-
-data class CameraJumpResult(
-  val jumpDetected: Boolean,
-  val trackingState: CameraTrackingState,
-)
-
 /**
  * Detects a jump from a vertical body-position cycle. Movement is normalized by the observed
  * torso height, keeping sensitivity stable across camera resolutions and viewing distances.

@@ -30,10 +30,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.viewModelScope
 import com.example.jump.core.camera.CameraJumpPreview
 import com.example.jump.core.camera.CameraTrackingState
 import com.example.jump.core.designsystem.component.JumpBadge
@@ -50,26 +48,6 @@ import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.SessionPhase
-import com.example.jump.core.workout.WorkoutController
-import com.example.jump.core.workout.WorkoutCoordinator
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.launch
-
-@HiltViewModel
-class WorkoutViewModel @Inject constructor(
-  coordinator: WorkoutCoordinator,
-  private val controller: WorkoutController,
-) : ViewModel() {
-  val state = coordinator.state
-  private val workoutCoordinator = coordinator
-  fun togglePause() = controller.togglePause()
-  fun pauseCamera() = controller.pause()
-  fun finish() = controller.stop()
-  fun correct(jumps: Int) = viewModelScope.launch { workoutCoordinator.correctJumps(jumps) }
-  fun registerCameraJump() = workoutCoordinator.registerJump()
-  fun clear() = workoutCoordinator.clear()
-}
 
 @Composable
 fun WorkoutRoute(onDone: () -> Unit, viewModel: WorkoutViewModel = hiltViewModel()) {

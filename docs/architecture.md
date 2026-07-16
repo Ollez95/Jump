@@ -28,6 +28,8 @@ an app module that composes features and owns root navigation.
 - `:core:database` and `:core:datastore` are implementation details behind repositories.
 - `:core:workout` owns the sensor detector, session coordinator, controller, and foreground service.
 - `:core:camera` owns lifecycle-bound preview, on-device pose analysis, and camera jump detection.
+- `:core:permissions` owns runtime-permission policy and Android grant checks; the app owns the
+  Activity Result launcher and navigation response.
 - `:core:designsystem` owns the theme, reusable components, and display formatting.
 
 ## Configurable interval workouts

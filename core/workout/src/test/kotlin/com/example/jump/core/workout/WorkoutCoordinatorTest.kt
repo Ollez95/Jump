@@ -1,15 +1,11 @@
 package com.example.jump.core.workout
 
-import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.SessionPhase
 import com.example.jump.core.model.WorkoutInterval
 import com.example.jump.core.model.WorkoutKind
 import com.example.jump.core.model.WorkoutPlan
-import com.example.jump.core.model.WorkoutSession
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
@@ -92,16 +88,4 @@ class WorkoutCoordinatorTest {
     assertEquals(1, repository.savedSessions.size)
     assertEquals(1L, coordinator.state.value.savedSessionId)
   }
-}
-
-private class FakeWorkoutRepository : WorkoutRepository {
-  override val sessions: Flow<List<WorkoutSession>> = MutableStateFlow(emptyList())
-  val savedSessions = mutableListOf<WorkoutSession>()
-  override suspend fun save(session: WorkoutSession): Long {
-    savedSessions += session
-    return savedSessions.size.toLong()
-  }
-  override suspend fun session(id: Long): WorkoutSession? = null
-  override suspend fun correctJumps(id: Long, jumps: Int) = Unit
-  override suspend fun deleteSession(id: Long) = Unit
 }

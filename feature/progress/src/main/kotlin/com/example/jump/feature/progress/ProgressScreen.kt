@@ -27,9 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpDetailRow
 import com.example.jump.core.designsystem.component.JumpHeader
@@ -39,29 +37,9 @@ import com.example.jump.core.designsystem.component.JumpStatCard
 import com.example.jump.core.designsystem.component.JumpTopAppBar
 import com.example.jump.core.domain.TrainingDay
 import com.example.jump.core.domain.TrainingWeek
-import com.example.jump.core.domain.WorkoutProgressAnalyzer
-import com.example.jump.core.domain.WorkoutProgressReport
-import com.example.jump.core.domain.repository.WorkoutRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-
-data class ProgressUiState(val report: WorkoutProgressReport? = null)
-
-@HiltViewModel
-class ProgressViewModel @Inject constructor(
-  workouts: WorkoutRepository,
-  analyzer: WorkoutProgressAnalyzer,
-) : ViewModel() {
-  val uiState = workouts.sessions
-    .map { ProgressUiState(analyzer.analyze(it)) }
-    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProgressUiState())
-}
 
 @Composable
 fun ProgressRoute(
