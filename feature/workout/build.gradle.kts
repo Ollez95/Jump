@@ -11,6 +11,7 @@ dependencies {
   implementation(project(":core:model"))
   implementation(project(":core:workout"))
   implementation(project(":core:designsystem"))
+  implementation(project(":core:camera"))
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)
   androidTestImplementation(composeBom)

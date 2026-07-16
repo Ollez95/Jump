@@ -17,6 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.example.jump.core.data.repository.UserPreferencesRepository
 import com.example.jump.core.designsystem.component.JumpCard
+import com.example.jump.core.designsystem.component.JumpChoiceCard
 import com.example.jump.core.designsystem.component.JumpDetailRow
 import com.example.jump.core.designsystem.component.JumpEyebrow
 import com.example.jump.core.designsystem.component.JumpHeader
@@ -25,6 +26,7 @@ import com.example.jump.core.designsystem.component.JumpScreen
 import com.example.jump.core.designsystem.component.JumpSecondaryButton
 import com.example.jump.core.designsystem.component.JumpSettingRow
 import com.example.jump.core.model.CuePreferences
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.ExperienceLevel
 import com.example.jump.core.model.TrainingGoal
 import com.example.jump.core.model.UserProfile
@@ -38,18 +40,29 @@ import kotlinx.coroutines.launch
 class SettingsViewModel @Inject constructor(private val preferences: UserPreferencesRepository) : ViewModel() {
   val profile = preferences.profile.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserProfile())
   val cues = preferences.cues.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CuePreferences())
+  val countingMode = preferences.countingMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CountingMode.MOTION)
   fun updateCues(cues: CuePreferences) = viewModelScope.launch { preferences.setCuePreferences(cues) }
+  fun updateCountingMode(mode: CountingMode) = viewModelScope.launch { preferences.setCountingMode(mode) }
   fun resetOnboarding() = viewModelScope.launch { preferences.resetOnboarding() }
 }
 
 @Composable
 fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
-  val profile by viewModel.profile.collectAsStateWithLifecycle(); val cues by viewModel.cues.collectAsStateWithLifecycle()
-  SettingsScreen(profile, cues, viewModel::updateCues, viewModel::resetOnboarding)
+  val profile by viewModel.profile.collectAsStateWithLifecycle()
+  val cues by viewModel.cues.collectAsStateWithLifecycle()
+  val countingMode by viewModel.countingMode.collectAsStateWithLifecycle()
+  SettingsScreen(profile, cues, countingMode, viewModel::updateCues, viewModel::updateCountingMode, viewModel::resetOnboarding)
 }
 
 @Composable
-fun SettingsScreen(profile: UserProfile, cues: CuePreferences, onCues: (CuePreferences) -> Unit, onReset: () -> Unit) {
+fun SettingsScreen(
+  profile: UserProfile,
+  cues: CuePreferences,
+  countingMode: CountingMode,
+  onCues: (CuePreferences) -> Unit,
+  onCountingMode: (CountingMode) -> Unit,
+  onReset: () -> Unit,
+) {
   JumpScreen {
     LazyColumn(
       Modifier.fillMaxSize(),
@@ -63,6 +76,23 @@ fun SettingsScreen(profile: UserProfile, cues: CuePreferences, onCues: (CuePrefe
           description = "Tune your coaching cues and training plan.",
           brandMark = true,
         )
+      }
+      item {
+        JumpCard {
+          JumpEyebrow("Default counting method")
+          JumpChoiceCard(
+            label = "Pocket motion",
+            description = "Best when your phone is secured close to your body.",
+            selected = countingMode == CountingMode.MOTION,
+            onClick = { onCountingMode(CountingMode.MOTION) },
+          )
+          JumpChoiceCard(
+            label = "Camera tracking",
+            description = "On-device pose tracking; frames are never stored.",
+            selected = countingMode == CountingMode.CAMERA,
+            onClick = { onCountingMode(CountingMode.CAMERA) },
+          )
+        }
       }
       item {
         JumpCard {

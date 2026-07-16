@@ -4,6 +4,7 @@ enum class ExperienceLevel { BEGINNER, REGULAR, ADVANCED }
 enum class TrainingGoal { CONSISTENCY, ENDURANCE, SPEED }
 enum class IntervalType { WORK, REST }
 enum class WorkoutKind { QUICK, DAILY }
+enum class CountingMode { MOTION, CAMERA }
 enum class SessionStatus { COMPLETED, CANCELLED, INTERRUPTED }
 enum class SessionPhase { IDLE, PREPARING, ACTIVE, RESTING, PAUSED, COMPLETED }
 
@@ -71,6 +72,7 @@ data class ActiveWorkoutState(
   val longestStreak: Int = 0,
   val calibrationRemainingMillis: Long = 0,
   val sensorAvailable: Boolean = true,
+  val countingMode: CountingMode = CountingMode.MOTION,
 ) {
   val isRunning: Boolean get() = phase in setOf(SessionPhase.PREPARING, SessionPhase.ACTIVE, SessionPhase.RESTING, SessionPhase.PAUSED)
 }

@@ -21,6 +21,7 @@ import android.speech.tts.TextToSpeech
 import androidx.core.app.NotificationCompat
 import com.example.jump.core.data.repository.UserPreferencesRepository
 import com.example.jump.core.model.CuePreferences
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.SessionPhase
 import com.example.jump.core.model.SessionStatus
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,6 +64,7 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
     when (intent?.action ?: ACTION_START) {
       ACTION_START -> startWorkout()
       ACTION_TOGGLE_PAUSE -> { coordinator.togglePause(); transitionCue(if (coordinator.state.value.phase == SessionPhase.PAUSED) "Paused" else "Go"); updateNotification() }
+      ACTION_PAUSE -> { coordinator.pause(); updateNotification() }
       ACTION_STOP -> finishWorkout(intent?.getStringExtra(EXTRA_STATUS)?.let { runCatching { SessionStatus.valueOf(it) }.getOrNull() } ?: SessionStatus.COMPLETED)
     }
     return START_NOT_STICKY
@@ -70,11 +72,13 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
 
   private fun startWorkout() {
     intentionallyStopped = false; lastMilestone = 0; detector.reset()
-    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-    if (accelerometer == null) coordinator.state.value.plan?.let { coordinator.prepare(it, sensorAvailable = false) }
-    else {
-      sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
-      sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+    if (coordinator.state.value.countingMode == CountingMode.MOTION) {
+      val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+      if (accelerometer == null) coordinator.state.value.plan?.let { coordinator.prepare(it, CountingMode.MOTION, sensorAvailable = false) }
+      else {
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+      }
     }
     startForeground(NOTIFICATION_ID, buildNotification())
     transitionCue("Get ready")
@@ -165,6 +169,7 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
   companion object {
     const val ACTION_START = "com.example.jump.action.START"
     const val ACTION_TOGGLE_PAUSE = "com.example.jump.action.TOGGLE_PAUSE"
+    const val ACTION_PAUSE = "com.example.jump.action.PAUSE"
     const val ACTION_STOP = "com.example.jump.action.STOP"
     const val EXTRA_STATUS = "status"
     private const val CHANNEL_ID = "active_workout"

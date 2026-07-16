@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.jump.core.model.CuePreferences
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.ExperienceLevel
 import com.example.jump.core.model.TrainingGoal
 import com.example.jump.core.model.UserProfile
@@ -31,6 +32,7 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
     val voice = booleanPreferencesKey("voice")
     val tones = booleanPreferencesKey("tones")
     val vibration = booleanPreferencesKey("vibration")
+    val countingMode = stringPreferencesKey("counting_mode")
   }
 
   private val dataStore = context.jumpDataStore
@@ -49,6 +51,10 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
     CuePreferences(values[Keys.voice] ?: true, values[Keys.tones] ?: true, values[Keys.vibration] ?: true)
   }
 
+  val countingMode: Flow<CountingMode> = safeData.map { values ->
+    values[Keys.countingMode]?.let { runCatching { CountingMode.valueOf(it) }.getOrNull() } ?: CountingMode.MOTION
+  }
+
   suspend fun saveProfile(profile: UserProfile) {
     dataStore.edit { values ->
       values[Keys.onboarding] = true
@@ -64,6 +70,10 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
       values[Keys.tones] = cues.tonesEnabled
       values[Keys.vibration] = cues.vibrationEnabled
     }
+  }
+
+  suspend fun setCountingMode(mode: CountingMode) {
+    dataStore.edit { values -> values[Keys.countingMode] = mode.name }
   }
 
   suspend fun resetOnboarding() { dataStore.edit { it[Keys.onboarding] = false } }

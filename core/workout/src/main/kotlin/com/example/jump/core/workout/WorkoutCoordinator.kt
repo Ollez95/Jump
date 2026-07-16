@@ -2,6 +2,7 @@ package com.example.jump.core.workout
 
 import com.example.jump.core.data.repository.WorkoutRepository
 import com.example.jump.core.model.ActiveWorkoutState
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.JumpMetrics
 import com.example.jump.core.model.SessionPhase
@@ -24,11 +25,17 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
   private var lastTickMillis = 0L
   private var lastJumpMillis = 0L
 
-  @Synchronized fun prepare(plan: WorkoutPlan, sensorAvailable: Boolean = true, now: Long = System.currentTimeMillis()) {
+  @Synchronized fun prepare(
+    plan: WorkoutPlan,
+    countingMode: CountingMode = CountingMode.MOTION,
+    sensorAvailable: Boolean = true,
+    now: Long = System.currentTimeMillis(),
+  ) {
     recentJumps.clear(); lastTickMillis = now; lastJumpMillis = 0
     mutableState.value = ActiveWorkoutState(
       plan = plan, phase = SessionPhase.PREPARING, startedAtEpochMillis = now,
       intervalRemainingMillis = 3_000, calibrationRemainingMillis = 10_000, sensorAvailable = sensorAvailable,
+      countingMode = countingMode,
     )
   }
 
@@ -90,7 +97,14 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
     val old = mutableState.value
     mutableState.value = if (old.phase == SessionPhase.PAUSED) {
       lastTickMillis = System.currentTimeMillis(); old.copy(phase = old.phaseBeforePause)
-    } else if (old.phase in setOf(SessionPhase.ACTIVE, SessionPhase.RESTING)) old.copy(phase = SessionPhase.PAUSED, phaseBeforePause = old.phase) else old
+    } else if (old.phase in setOf(SessionPhase.PREPARING, SessionPhase.ACTIVE, SessionPhase.RESTING)) old.copy(phase = SessionPhase.PAUSED, phaseBeforePause = old.phase) else old
+  }
+
+  @Synchronized fun pause() {
+    val old = mutableState.value
+    if (old.phase in setOf(SessionPhase.PREPARING, SessionPhase.ACTIVE, SessionPhase.RESTING)) {
+      mutableState.value = old.copy(phase = SessionPhase.PAUSED, phaseBeforePause = old.phase)
+    }
   }
 
   suspend fun finish(status: SessionStatus = SessionStatus.COMPLETED): Long? {

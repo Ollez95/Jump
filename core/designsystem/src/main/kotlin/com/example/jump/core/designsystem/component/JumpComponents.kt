@@ -24,6 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -31,6 +32,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,20 +57,22 @@ import java.util.Locale
 @Composable
 fun JumpScreen(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
   val colors = MaterialTheme.colorScheme
-  Box(
-    modifier
-      .fillMaxSize()
-      .background(
-        Brush.verticalGradient(
-          listOf(
-            colors.background,
-            colors.surfaceContainerLow.copy(alpha = 0.7f),
-            colors.background,
+  CompositionLocalProvider(LocalContentColor provides colors.onBackground) {
+    Box(
+      modifier
+        .fillMaxSize()
+        .background(
+          Brush.verticalGradient(
+            listOf(
+              colors.background,
+              colors.surfaceContainerLow.copy(alpha = 0.7f),
+              colors.background,
+            ),
           ),
         ),
-      ),
-  ) {
-    content()
+    ) {
+      content()
+    }
   }
 }
 
@@ -214,7 +218,13 @@ fun JumpSecondaryButton(
 }
 
 @Composable
-fun JumpChoiceCard(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun JumpChoiceCard(
+  label: String,
+  selected: Boolean,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  description: String? = null,
+) {
   val colors = MaterialTheme.colorScheme
   Surface(
     onClick = onClick,
@@ -235,7 +245,10 @@ fun JumpChoiceCard(label: String, selected: Boolean, onClick: () -> Unit, modifi
         if (selected) Box(Modifier.size(10.dp).clip(CircleShape).background(colors.primary))
       }
       Spacer(Modifier.width(JumpSpacing.sm))
-      Text(label, style = MaterialTheme.typography.titleMedium)
+      Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label, style = MaterialTheme.typography.titleMedium)
+        description?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant) }
+      }
     }
   }
 }
@@ -365,8 +378,8 @@ fun JumpCounterOrb(value: String, label: String, modifier: Modifier = Modifier) 
       drawArc(colors.primary.copy(alpha = 0.7f), -90f, 235f, false, style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round))
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Text(value, style = MaterialTheme.typography.displayLarge)
-      Text(label.uppercase(), style = MaterialTheme.typography.labelMedium, letterSpacing = 2.sp)
+      Text(value, style = MaterialTheme.typography.displayLarge, color = colors.onPrimaryContainer)
+      Text(label.uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.onPrimaryContainer, letterSpacing = 2.sp)
     }
   }
 }

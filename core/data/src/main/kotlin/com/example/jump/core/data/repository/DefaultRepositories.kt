@@ -7,6 +7,7 @@ import com.example.jump.core.database.WorkoutIntervalEntity
 import com.example.jump.core.database.WorkoutSessionEntity
 import com.example.jump.core.datastore.JumpPreferencesDataSource
 import com.example.jump.core.model.CuePreferences
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.JumpMetrics
 import com.example.jump.core.model.SessionStatus
@@ -25,8 +26,10 @@ class DefaultUserPreferencesRepository @Inject constructor(
 ) : UserPreferencesRepository {
   override val profile = dataSource.profile
   override val cues = dataSource.cues
+  override val countingMode = dataSource.countingMode
   override suspend fun saveProfile(profile: UserProfile) { dataSource.saveProfile(profile) }
   override suspend fun setCuePreferences(cues: CuePreferences) { dataSource.setCues(cues) }
+  override suspend fun setCountingMode(mode: CountingMode) { dataSource.setCountingMode(mode) }
   override suspend fun resetOnboarding() { dataSource.resetOnboarding() }
 }
 

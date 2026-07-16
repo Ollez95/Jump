@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jump.core.data.repository.UserPreferencesRepository
 import com.example.jump.core.model.ActiveWorkoutState
+import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.UserProfile
 import com.example.jump.core.model.WorkoutPlan
 import com.example.jump.core.workout.WorkoutController
@@ -22,5 +23,5 @@ class AppViewModel @Inject constructor(
 ) : ViewModel() {
   val profile: StateFlow<UserProfile?> = preferences.profile.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
   val active: StateFlow<ActiveWorkoutState> = coordinator.state
-  fun start(plan: WorkoutPlan) = controller.start(plan)
+  fun start(plan: WorkoutPlan, countingMode: CountingMode) = controller.start(plan, countingMode)
 }

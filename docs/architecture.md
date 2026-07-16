@@ -10,7 +10,8 @@ an app module that composes features and owns root navigation.
 :app
   ├── :feature:{onboarding,home,workout,history,settings}
   ├── :core:designsystem
-  └── :core:workout
+  ├── :core:workout
+  └── :core:camera
 
 :feature:* → :core:data / :core:domain / :core:model / :core:designsystem
 :core:workout → :core:data → :core:database + :core:datastore
@@ -25,6 +26,7 @@ an app module that composes features and owns root navigation.
 - `:core:data` exposes repository interfaces and binds their default implementations.
 - `:core:database` and `:core:datastore` are implementation details behind repositories.
 - `:core:workout` owns the sensor detector, session coordinator, controller, and foreground service.
+- `:core:camera` owns lifecycle-bound preview, on-device pose analysis, and camera jump detection.
 - `:core:designsystem` owns the theme, reusable components, and display formatting.
 
 ## Dependency rules
@@ -36,3 +38,17 @@ an app module that composes features and owns root navigation.
 - Navigation entries receive saveable-state and ViewModel-store decorators so feature ViewModels are
   cleared when their destination is popped.
 - Shared Android and JVM settings live in convention plugins under `build-logic`.
+
+## Camera counting
+
+Camera counting is an optional alternative to pocket motion counting. `:core:camera` binds CameraX
+preview and image analysis to the workout screen lifecycle, uses ML Kit Pose Detection in streaming
+mode, and converts shoulder/hip landmarks into normalized vertical body-position samples. A pure
+detector applies calibration, smoothing, confidence thresholds, hysteresis, air-time limits, and a
+cooldown before emitting a jump on landing.
+
+Frames are processed in memory with `STRATEGY_KEEP_ONLY_LATEST`, closed immediately after inference,
+and are never recorded, persisted, or sent by the app. The camera is released when the workout
+screen leaves the active lifecycle. Camera detections enter `WorkoutCoordinator`, so timing,
+pause/rest behavior, metrics, corrections, and session persistence stay identical across counting
+methods.

@@ -26,6 +26,7 @@ import com.example.jump.core.designsystem.component.JumpNavigationBar
 import com.example.jump.core.designsystem.component.JumpNavigationIcon
 import com.example.jump.core.designsystem.component.JumpNavigationItem
 import com.example.jump.core.model.WorkoutPlan
+import com.example.jump.core.model.CountingMode
 import com.example.jump.feature.history.HistoryRoute
 import com.example.jump.feature.history.SessionDetailRoute
 import com.example.jump.feature.home.HomeRoute
@@ -38,26 +39,32 @@ fun MainNavigation(viewModel: AppViewModel) {
   val backStack = rememberNavBackStack(Main)
   val current = backStack.lastOrNull()
   val context = LocalContext.current
-  var pendingPlan by remember { mutableStateOf<WorkoutPlan?>(null) }
-  var permissionError by remember { mutableStateOf(false) }
+  var pendingStart by remember { mutableStateOf<Pair<WorkoutPlan, CountingMode>?>(null) }
+  var permissionError by remember { mutableStateOf<CountingMode?>(null) }
   val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-    val activityGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || result[Manifest.permission.ACTIVITY_RECOGNITION] == true ||
-      ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
-    if (activityGranted) {
-      pendingPlan?.let(viewModel::start)
+    val pending = pendingStart
+    val counterPermissionGranted = when (pending?.second) {
+      CountingMode.CAMERA -> result[Manifest.permission.CAMERA] == true || ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+      CountingMode.MOTION -> Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || result[Manifest.permission.ACTIVITY_RECOGNITION] == true ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
+      null -> false
+    }
+    if (counterPermissionGranted && pending != null) {
+      viewModel.start(pending.first, pending.second)
       if (backStack.lastOrNull() !is Active) backStack.add(Active)
-      permissionError = false
-    } else permissionError = true
-    pendingPlan = null
+      permissionError = null
+    } else permissionError = pending?.second
+    pendingStart = null
   }
 
-  fun requestStart(plan: WorkoutPlan) {
-    pendingPlan = plan
+  fun requestStart(plan: WorkoutPlan, countingMode: CountingMode) {
+    pendingStart = plan to countingMode
     val required = buildList {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.ACTIVITY_RECOGNITION)
+      if (countingMode == CountingMode.CAMERA && ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.CAMERA)
+      if (countingMode == CountingMode.MOTION && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.ACTIVITY_RECOGNITION)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.POST_NOTIFICATIONS)
     }
-    if (required.isEmpty()) { viewModel.start(plan); backStack.add(Active); pendingPlan = null } else launcher.launch(required.toTypedArray())
+    if (required.isEmpty()) { viewModel.start(plan, countingMode); backStack.add(Active); pendingStart = null; permissionError = null } else launcher.launch(required.toTypedArray())
   }
 
   val showBottomBar = current is Main || current is History || current is Settings
