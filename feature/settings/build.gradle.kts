@@ -9,7 +9,7 @@ android { namespace = "com.example.jump.feature.settings" }
 
 dependencies {
   implementation(project(":core:model"))
-  implementation(project(":core:data"))
+  implementation(project(":core:domain"))
   implementation(project(":core:designsystem"))
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)

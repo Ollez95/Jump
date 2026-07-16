@@ -15,7 +15,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.example.jump.core.data.repository.UserPreferencesRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpChoiceCard
 import com.example.jump.core.designsystem.component.JumpDetailRow
@@ -24,10 +23,13 @@ import com.example.jump.core.designsystem.component.JumpHeader
 import com.example.jump.core.designsystem.component.JumpInfoBanner
 import com.example.jump.core.designsystem.component.JumpPrimaryButton
 import com.example.jump.core.designsystem.component.JumpScreen
-import com.example.jump.core.designsystem.component.JumpSecondaryButton
 import com.example.jump.core.designsystem.component.JumpValueStepper
+import com.example.jump.core.designsystem.component.JumpTopAppBar
 import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.domain.IntervalWorkoutPlanner
+import com.example.jump.core.domain.WorkoutCalorieEstimate
+import com.example.jump.core.domain.WorkoutCalorieEstimator
+import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalWorkoutConfig
@@ -45,18 +47,20 @@ data class WorkoutSetupUiState(
   val configuration: IntervalWorkoutConfig = IntervalWorkoutConfig(),
   val countingMode: CountingMode = CountingMode.MOTION,
   val activeWorkout: ActiveWorkoutState = ActiveWorkoutState(),
+  val calorieEstimate: WorkoutCalorieEstimate = WorkoutCalorieEstimate(),
 )
 
 @HiltViewModel
 class WorkoutSetupViewModel @Inject constructor(
   private val preferences: UserPreferencesRepository,
   private val planner: IntervalWorkoutPlanner,
+  private val calorieEstimator: WorkoutCalorieEstimator,
   coordinator: WorkoutCoordinator,
 ) : ViewModel() {
   private val configuration = MutableStateFlow(IntervalWorkoutConfig())
 
   val uiState = combine(configuration, preferences.countingMode, coordinator.state) { config, mode, active ->
-    WorkoutSetupUiState(config, mode, active)
+    WorkoutSetupUiState(config, mode, active, calorieEstimator.estimate(config))
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WorkoutSetupUiState())
 
   init {
@@ -100,7 +104,15 @@ fun WorkoutSetupScreen(
   onBack: () -> Unit,
 ) {
   val config = state.configuration
-  JumpScreen {
+  JumpScreen(
+    topBar = {
+      JumpTopAppBar(
+        title = "Custom workout",
+        onBack = onBack,
+        backContentDescription = "Back to today",
+      )
+    },
+  ) {
     LazyColumn(
       Modifier.fillMaxSize(),
       contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
@@ -153,6 +165,12 @@ fun WorkoutSetupScreen(
           JumpDetailRow("Active jumping", formatDuration(config.activeSeconds * 1_000L))
           JumpDetailRow("Recovery", formatDuration(config.restSeconds * (config.rounds - 1).coerceAtLeast(0) * 1_000L))
           JumpDetailRow("Total time", formatDuration(config.totalSeconds * 1_000L))
+          JumpDetailRow("Estimated burn", state.calorieEstimate.asCalories())
+          Text(
+            "Estimate for a ${state.calorieEstimate.referenceWeightKg} kg person at a slow-to-fast pace. Actual calories vary by body weight, pace, technique, and fitness.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
         }
       }
       item {
@@ -178,11 +196,10 @@ fun WorkoutSetupScreen(
       item {
         JumpPrimaryButton("Start custom workout", onStart, Modifier.fillMaxWidth(), enabled = !state.activeWorkout.isRunning)
       }
-      item {
-        JumpSecondaryButton("Back to today", onBack, Modifier.fillMaxWidth())
-      }
     }
   }
 }
 
 private fun Int.asDuration(): String = if (this < 60) "${this}s" else formatDuration(this * 1_000L)
+
+private fun WorkoutCalorieEstimate.asCalories(): String = "~$minimumCalories–$maximumCalories kcal"

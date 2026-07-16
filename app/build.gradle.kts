@@ -86,6 +86,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
   implementation(project(":core:model"))
+  implementation(project(":core:domain"))
   implementation(project(":core:data"))
   implementation(project(":core:designsystem"))
   implementation(project(":core:workout"))
@@ -94,6 +95,7 @@ dependencies {
   implementation(project(":feature:workout"))
   implementation(project(":feature:workoutsetup"))
   implementation(project(":feature:history"))
+  implementation(project(":feature:progress"))
   implementation(project(":feature:settings"))
   implementation(libs.dagger.hilt.android)
   implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)

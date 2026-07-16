@@ -2,8 +2,8 @@ package com.example.jump.core.data.di
 
 import com.example.jump.core.data.repository.DefaultUserPreferencesRepository
 import com.example.jump.core.data.repository.DefaultWorkoutRepository
-import com.example.jump.core.data.repository.UserPreferencesRepository
-import com.example.jump.core.data.repository.WorkoutRepository
+import com.example.jump.core.domain.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.WorkoutRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

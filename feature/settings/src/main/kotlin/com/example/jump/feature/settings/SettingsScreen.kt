@@ -15,7 +15,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.example.jump.core.data.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpChoiceCard
 import com.example.jump.core.designsystem.component.JumpDetailRow

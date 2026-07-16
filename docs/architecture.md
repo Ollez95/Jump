@@ -8,13 +8,14 @@ an app module that composes features and owns root navigation.
 
 ```text
 :app
-  ├── :feature:{onboarding,home,workout,workoutsetup,history,settings}
+  ├── :feature:{onboarding,home,workout,workoutsetup,history,progress,settings}
   ├── :core:designsystem
   ├── :core:workout
   └── :core:camera
 
-:feature:* → :core:data / :core:domain / :core:model / :core:designsystem
-:core:workout → :core:data → :core:database + :core:datastore
+:feature:* → :core:domain / :core:model / :core:designsystem
+:core:workout → :core:domain
+:core:data → :core:domain + :core:database + :core:datastore
 :core:domain → :core:model
 ```
 
@@ -22,8 +23,8 @@ an app module that composes features and owns root navigation.
   startup state. It contains no persistence or workout implementation.
 - `:feature:*` modules own their routes, stateless screens, UI state, and Hilt ViewModels.
 - `:core:model` contains platform-independent domain models.
-- `:core:domain` contains reusable business rules such as adaptive workout planning.
-- `:core:data` exposes repository interfaces and binds their default implementations.
+- `:core:domain` contains repository contracts and reusable business rules such as adaptive workout planning.
+- `:core:data` implements repository contracts and binds the implementations with Hilt.
 - `:core:database` and `:core:datastore` are implementation details behind repositories.
 - `:core:workout` owns the sensor detector, session coordinator, controller, and foreground service.
 - `:core:camera` owns lifecycle-bound preview, on-device pose analysis, and camera jump detection.
@@ -43,9 +44,15 @@ motion counting, metrics, completion, and Room-backed history persistence.
 ## Dependency rules
 
 - Features never depend on other features; the app mediates navigation with primitive IDs.
-- Features depend on repository abstractions, not Room DAOs or DataStore.
+- Features depend on repository abstractions in `:core:domain`, not the `:core:data` implementation,
+  Room DAOs, or DataStore.
 - Implementation modules are not exposed transitively with `api` dependencies.
 - Hilt scopes stateful infrastructure to the application and ViewModels to navigation entries.
+- Repository contracts live in `:core:domain`; only `:core:data` knows the Room and DataStore
+  implementations.
+- Workout completion is idempotent, so concurrent UI/service finish requests persist one session.
+- Long-running workout work uses injected coroutine dispatchers; service teardown never blocks the
+  main thread while Room writes complete.
 - Navigation entries receive saveable-state and ViewModel-store decorators so feature ViewModels are
   cleared when their destination is popped.
 - Shared Android and JVM settings live in convention plugins under `build-logic`.

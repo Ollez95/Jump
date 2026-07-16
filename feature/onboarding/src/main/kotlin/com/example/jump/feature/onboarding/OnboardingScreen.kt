@@ -14,14 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jump.core.data.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpChoiceCard
 import com.example.jump.core.designsystem.component.JumpEyebrow
@@ -48,9 +48,9 @@ fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel()) {
 
 @Composable
 fun OnboardingScreen(onFinish: (UserProfile) -> Unit) {
-  var level by remember { mutableStateOf(ExperienceLevel.BEGINNER) }
-  var goal by remember { mutableStateOf(TrainingGoal.CONSISTENCY) }
-  var frequency by remember { mutableIntStateOf(3) }
+  var level by rememberSaveable { mutableStateOf(ExperienceLevel.BEGINNER) }
+  var goal by rememberSaveable { mutableStateOf(TrainingGoal.CONSISTENCY) }
+  var frequency by rememberSaveable { mutableIntStateOf(3) }
   JumpScreen {
     LazyColumn(
       Modifier.fillMaxSize(),

@@ -9,7 +9,6 @@ android { namespace = "com.example.jump.feature.workoutsetup" }
 
 dependencies {
   implementation(project(":core:model"))
-  implementation(project(":core:data"))
   implementation(project(":core:domain"))
   implementation(project(":core:designsystem"))
   implementation(project(":core:workout"))

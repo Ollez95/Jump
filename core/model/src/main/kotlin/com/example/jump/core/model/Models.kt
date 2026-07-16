@@ -46,7 +46,7 @@ data class IntervalWorkoutConfig(
     const val MIN_REST_SECONDS = 0
     const val MAX_REST_SECONDS = 180
     const val MIN_ROUNDS = 1
-    const val MAX_ROUNDS = 20
+    const val MAX_ROUNDS = 60
   }
 }
 

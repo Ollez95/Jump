@@ -55,6 +55,7 @@ interface WorkoutDao {
   @Insert suspend fun insertSession(session: WorkoutSessionEntity): Long
   @Insert suspend fun insertIntervals(intervals: List<WorkoutIntervalEntity>)
   @Query("UPDATE workout_sessions SET correctedJumps = :jumps WHERE id = :id") suspend fun updateCorrectedJumps(id: Long, jumps: Int)
+  @Query("DELETE FROM workout_sessions WHERE id = :id") suspend fun deleteSession(id: Long)
 }
 
 @Database(entities = [WorkoutSessionEntity::class, WorkoutIntervalEntity::class], version = 1, exportSchema = true)

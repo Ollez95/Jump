@@ -1,6 +1,6 @@
 package com.example.jump.core.workout
 
-import com.example.jump.core.data.repository.WorkoutRepository
+import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
@@ -16,12 +16,15 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Singleton
 class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepository) {
   private val mutableState = MutableStateFlow(ActiveWorkoutState())
   val state: StateFlow<ActiveWorkoutState> = mutableState.asStateFlow()
   private val recentJumps = ArrayDeque<Long>()
+  private val finishMutex = Mutex()
   private var lastTickMillis = 0L
   private var lastJumpMillis = 0L
 
@@ -87,7 +90,7 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
     val pace = if (recentJumps.size < 2) 0 else (((recentJumps.size - 1) * 60_000.0) / (recentJumps.last() - recentJumps.first()).coerceAtLeast(1)).toInt().coerceAtMost(300)
     val streak = old.currentStreak + 1
     mutableState.value = old.copy(
-      detectedJumps = old.detectedJumps + 1, correctedJumps = old.detectedJumps + 1,
+      detectedJumps = old.detectedJumps + 1, correctedJumps = old.correctedJumps + 1,
       currentPace = pace, bestPace = maxOf(old.bestPace, pace), currentStreak = streak,
       longestStreak = maxOf(old.longestStreak, streak),
     )
@@ -107,8 +110,9 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
     }
   }
 
-  suspend fun finish(status: SessionStatus = SessionStatus.COMPLETED): Long? {
+  suspend fun finish(status: SessionStatus = SessionStatus.COMPLETED): Long? = finishMutex.withLock {
     val snapshot = mutableState.value
+    snapshot.savedSessionId?.let { return@withLock it }
     val plan = snapshot.plan ?: return null
     if (snapshot.phase == SessionPhase.IDLE) return null
     val averagePace = if (snapshot.activeMillis == 0L) 0 else (snapshot.detectedJumps * 60_000L / snapshot.activeMillis).toInt()
@@ -119,7 +123,7 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
       status = status, intervals = plan.intervals,
     ))
     mutableState.value = snapshot.copy(phase = SessionPhase.COMPLETED, savedSessionId = id)
-    return id
+    id
   }
 
   suspend fun correctJumps(jumps: Int) {

@@ -7,5 +7,6 @@ import kotlinx.serialization.Serializable
 @Serializable data object Active : NavKey
 @Serializable data object WorkoutSetup : NavKey
 @Serializable data object History : NavKey
+@Serializable data object Progress : NavKey
 @Serializable data object Settings : NavKey
 @Serializable data class SessionDetail(val sessionId: Long) : NavKey

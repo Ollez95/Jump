@@ -8,6 +8,7 @@ android { namespace = "com.example.jump.core.data" }
 
 dependencies {
   implementation(project(":core:model"))
+  implementation(project(":core:domain"))
   implementation(project(":core:database"))
   implementation(project(":core:datastore"))
   implementation(libs.androidx.room.ktx)

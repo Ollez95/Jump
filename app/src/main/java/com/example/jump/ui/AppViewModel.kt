@@ -2,7 +2,7 @@ package com.example.jump.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jump.core.data.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.UserProfile

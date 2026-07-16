@@ -19,7 +19,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.speech.tts.TextToSpeech
 import androidx.core.app.NotificationCompat
-import com.example.jump.core.data.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.model.CuePreferences
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.SessionPhase
@@ -27,21 +27,22 @@ import com.example.jump.core.model.SessionStatus
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListener {
   @Inject lateinit var coordinator: WorkoutCoordinator
   @Inject lateinit var preferences: UserPreferencesRepository
-  private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+  @Inject @WorkoutDispatcher lateinit var workoutDispatcher: CoroutineDispatcher
+  @Inject @WorkoutApplicationScope lateinit var applicationScope: CoroutineScope
+  private val serviceJob = SupervisorJob()
+  private val scope by lazy { CoroutineScope(serviceJob + workoutDispatcher) }
   private lateinit var sensorManager: SensorManager
   private val detector = JumpDetector()
   private var ticker: Job? = null
@@ -63,7 +64,19 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     when (intent?.action ?: ACTION_START) {
       ACTION_START -> startWorkout()
-      ACTION_TOGGLE_PAUSE -> { coordinator.togglePause(); transitionCue(if (coordinator.state.value.phase == SessionPhase.PAUSED) "Paused" else "Go"); updateNotification() }
+      ACTION_TOGGLE_PAUSE -> {
+        coordinator.togglePause()
+        transitionCue(
+          getString(
+            if (coordinator.state.value.phase == SessionPhase.PAUSED) {
+              R.string.workout_cue_paused
+            } else {
+              R.string.workout_cue_go
+            },
+          ),
+        )
+        updateNotification()
+      }
       ACTION_PAUSE -> { coordinator.pause(); updateNotification() }
       ACTION_STOP -> finishWorkout(intent?.getStringExtra(EXTRA_STATUS)?.let { runCatching { SessionStatus.valueOf(it) }.getOrNull() } ?: SessionStatus.COMPLETED)
     }
@@ -81,15 +94,15 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
       }
     }
     startForeground(NOTIFICATION_ID, buildNotification())
-    transitionCue("Get ready")
+    transitionCue(getString(R.string.workout_cue_get_ready))
     ticker?.cancel()
     ticker = scope.launch {
       while (true) {
         delay(250)
         coordinator.tick()?.let { transition ->
           when (transition.phase) {
-            SessionPhase.ACTIVE -> transitionCue("Go")
-            SessionPhase.RESTING -> transitionCue("Rest")
+            SessionPhase.ACTIVE -> transitionCue(getString(R.string.workout_cue_go))
+            SessionPhase.RESTING -> transitionCue(getString(R.string.workout_cue_rest))
             SessionPhase.COMPLETED -> { finishWorkout(SessionStatus.COMPLETED); return@launch }
             else -> Unit
           }
@@ -104,7 +117,15 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
     intentionallyStopped = true; ticker?.cancel(); sensorManager.unregisterListener(this)
     scope.launch {
       coordinator.finish(status)
-      transitionCue(if (status == SessionStatus.COMPLETED) "Workout complete" else "Workout saved")
+      transitionCue(
+        getString(
+          if (status == SessionStatus.COMPLETED) {
+            R.string.workout_cue_complete
+          } else {
+            R.string.workout_cue_saved
+          },
+        ),
+      )
       stopForeground(STOP_FOREGROUND_REMOVE); stopSelf()
     }
   }
@@ -115,7 +136,10 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
       Sensor.TYPE_ACCELEROMETER -> if (detector.onAccelerometer(event.timestamp, event.values[0], event.values[1], event.values[2])?.confidence?.let { it >= .65f } == true) {
         coordinator.registerJump()
         val jumps = coordinator.state.value.detectedJumps
-        if (jumps / 100 > lastMilestone) { lastMilestone = jumps / 100; speak("$jumps jumps") }
+        if (jumps / 100 > lastMilestone) {
+          lastMilestone = jumps / 100
+          speak(resources.getQuantityString(R.plurals.workout_jump_count, jumps, jumps))
+        }
       }
     }
   }
@@ -141,11 +165,28 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
     val stop = PendingIntent.getService(this, 2, Intent(this, WorkoutService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     return NotificationCompat.Builder(this, CHANNEL_ID)
       .setSmallIcon(android.R.drawable.ic_media_play)
-      .setContentTitle(state.plan?.title ?: "Jump workout")
-      .setContentText("${state.detectedJumps} jumps • ${state.currentPace} per min")
+      .setContentTitle(state.plan?.title ?: getString(R.string.workout_notification_default_title))
+      .setContentText(
+        getString(
+          R.string.workout_notification_content,
+          state.detectedJumps,
+          state.currentPace,
+        ),
+      )
       .setContentIntent(open).setOnlyAlertOnce(true).setOngoing(true).setCategory(NotificationCompat.CATEGORY_SERVICE)
-      .addAction(0, if (state.phase == SessionPhase.PAUSED) "Resume" else "Pause", pause)
-      .addAction(0, "Finish", stop).build()
+      .addAction(
+        0,
+        getString(
+          if (state.phase == SessionPhase.PAUSED) {
+            R.string.workout_action_resume
+          } else {
+            R.string.workout_action_pause
+          },
+        ),
+        pause,
+      )
+      .addAction(0, getString(R.string.workout_action_finish), stop)
+      .build()
   }
 
   private fun updateNotification() { (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(NOTIFICATION_ID, buildNotification()) }
@@ -161,8 +202,11 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
   override fun onInit(status: Int) { if (status == TextToSpeech.SUCCESS) textToSpeech?.language = Locale.getDefault() }
   override fun onDestroy() {
     sensorManager.unregisterListener(this); textToSpeech?.shutdown(); tone?.release()
-    if (!intentionallyStopped && coordinator.state.value.isRunning) runBlocking(Dispatchers.IO) { coordinator.finish(SessionStatus.INTERRUPTED) }
-    scope.cancel(); super.onDestroy()
+    if (!intentionallyStopped && coordinator.state.value.isRunning) {
+      applicationScope.launch { coordinator.finish(SessionStatus.INTERRUPTED) }
+    }
+    serviceJob.cancel()
+    super.onDestroy()
   }
   override fun onBind(intent: Intent?): IBinder? = null
 

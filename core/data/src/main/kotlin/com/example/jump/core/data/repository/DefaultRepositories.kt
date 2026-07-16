@@ -6,6 +6,8 @@ import com.example.jump.core.database.WorkoutDao
 import com.example.jump.core.database.WorkoutIntervalEntity
 import com.example.jump.core.database.WorkoutSessionEntity
 import com.example.jump.core.datastore.JumpPreferencesDataSource
+import com.example.jump.core.domain.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.CuePreferences
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
@@ -66,6 +68,7 @@ class DefaultWorkoutRepository @Inject constructor(
   }
 
   override suspend fun correctJumps(id: Long, jumps: Int) = dao.updateCorrectedJumps(id, jumps.coerceAtLeast(0))
+  override suspend fun deleteSession(id: Long) { dao.deleteSession(id) }
 }
 
 private fun WorkoutSessionEntity.toDomain() = WorkoutSession(

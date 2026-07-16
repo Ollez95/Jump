@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import com.example.jump.core.model.CountingMode
 import com.example.jump.feature.history.HistoryRoute
 import com.example.jump.feature.history.SessionDetailRoute
 import com.example.jump.feature.home.HomeRoute
+import com.example.jump.feature.progress.ProgressRoute
 import com.example.jump.feature.settings.SettingsRoute
 import com.example.jump.feature.workout.WorkoutRoute
 import com.example.jump.feature.workoutsetup.WorkoutSetupRoute
@@ -84,7 +86,7 @@ fun MainNavigation(viewModel: AppViewModel) {
     }
   }, containerColor = MaterialTheme.colorScheme.background) { padding ->
     NavDisplay(
-      modifier = Modifier.padding(padding),
+      modifier = Modifier.padding(padding).consumeWindowInsets(padding),
       backStack = backStack,
       onBack = { backStack.removeLastOrNull() },
       entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
@@ -104,7 +106,13 @@ fun MainNavigation(viewModel: AppViewModel) {
           )
         }
         entry<Active> { WorkoutRoute(onDone = { backStack.clear(); backStack.add(Main) }) }
-        entry<History> { HistoryRoute(onOpen = { backStack.add(SessionDetail(it)) }) }
+        entry<History> {
+          HistoryRoute(
+            onOpen = { backStack.add(SessionDetail(it)) },
+            onProgress = { backStack.add(Progress) },
+          )
+        }
+        entry<Progress> { ProgressRoute(onBack = { backStack.removeLastOrNull() }) }
         entry<Settings> { SettingsRoute() }
         entry<SessionDetail> { key -> SessionDetailRoute(sessionId = key.sessionId, onBack = { backStack.removeLastOrNull() }) }
       },

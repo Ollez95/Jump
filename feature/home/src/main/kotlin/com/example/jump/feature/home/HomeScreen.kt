@@ -17,8 +17,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.example.jump.core.data.repository.UserPreferencesRepository
-import com.example.jump.core.data.repository.WorkoutRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpBadge
 import com.example.jump.core.designsystem.component.JumpChoiceCard
@@ -34,6 +32,10 @@ import com.example.jump.core.designsystem.component.JumpSecondaryButton
 import com.example.jump.core.designsystem.component.JumpStatCard
 import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.domain.AdaptiveWorkoutPlanner
+import com.example.jump.core.domain.WorkoutCalorieEstimate
+import com.example.jump.core.domain.WorkoutCalorieEstimator
+import com.example.jump.core.domain.repository.UserPreferencesRepository
+import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalWorkoutConfig
@@ -57,6 +59,9 @@ data class HomeUiState(
   val active: ActiveWorkoutState = ActiveWorkoutState(),
   val countingMode: CountingMode = CountingMode.MOTION,
   val intervalWorkoutConfig: IntervalWorkoutConfig = IntervalWorkoutConfig(),
+  val intervalCalorieEstimate: WorkoutCalorieEstimate = WorkoutCalorieEstimate(),
+  val completedSessionsThisWeek: Int = 0,
+  val personalBestJumps: Int = 0,
 )
 
 @HiltViewModel
@@ -65,6 +70,7 @@ class HomeViewModel @Inject constructor(
   workouts: WorkoutRepository,
   coordinator: WorkoutCoordinator,
   private val planner: AdaptiveWorkoutPlanner,
+  private val calorieEstimator: WorkoutCalorieEstimator,
 ) : ViewModel() {
   val uiState: StateFlow<HomeUiState> = combine(
     preferences.profile,
@@ -73,10 +79,27 @@ class HomeViewModel @Inject constructor(
     preferences.countingMode,
     preferences.intervalWorkoutConfig,
   ) { profile, sessions, active, countingMode, intervalConfig ->
-    HomeUiState(profile, sessions, planner.createDailyPlan(profile, sessions), active, countingMode, intervalConfig)
+    val weekStart = System.currentTimeMillis() - WEEK_MILLIS
+    HomeUiState(
+      profile = profile,
+      sessions = sessions,
+      dailyPlan = planner.createDailyPlan(profile, sessions),
+      active = active,
+      countingMode = countingMode,
+      intervalWorkoutConfig = intervalConfig,
+      intervalCalorieEstimate = calorieEstimator.estimate(intervalConfig),
+      completedSessionsThisWeek = sessions.count {
+        it.startedAtEpochMillis >= weekStart && it.status == SessionStatus.COMPLETED
+      },
+      personalBestJumps = sessions.maxOfOrNull { it.metrics.correctedJumps } ?: 0,
+    )
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
   val quickPlan: WorkoutPlan = planner.quickPlan()
   fun setCountingMode(mode: CountingMode) = viewModelScope.launch { preferences.setCountingMode(mode) }
+
+  private companion object {
+    const val WEEK_MILLIS = 7 * 24 * 60 * 60 * 1_000L
+  }
 }
 
 @Composable
@@ -101,10 +124,9 @@ fun HomeScreen(
   onConfigureWorkout: () -> Unit,
   onCountingModeChange: (CountingMode) -> Unit,
 ) {
-  val weekStart = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1_000L
-  val weeklyCount = state.sessions.count { it.startedAtEpochMillis >= weekStart && it.status == SessionStatus.COMPLETED }
+  val weeklyCount = state.completedSessionsThisWeek
   val weeklyGoal = state.profile.sessionsPerWeek
-  val best = state.sessions.maxOfOrNull { it.metrics.correctedJumps } ?: 0
+  val best = state.personalBestJumps
   val dailyPlan = state.dailyPlan
   JumpScreen {
     LazyColumn(
@@ -171,6 +193,10 @@ fun HomeScreen(
           JumpDetailRow("Rest", if (config.restSeconds == 0) "Off" else "${config.restSeconds}s between rounds")
           JumpDetailRow("Rounds", "${config.rounds}")
           JumpDetailRow("Total", formatDuration(config.totalSeconds * 1_000L))
+          JumpDetailRow(
+            "Estimated burn (${state.intervalCalorieEstimate.referenceWeightKg} kg)",
+            state.intervalCalorieEstimate.asCalories(),
+          )
           JumpPrimaryButton("Customize intervals", onConfigureWorkout, Modifier.fillMaxWidth(), enabled = !state.active.isRunning)
         }
       }
@@ -210,3 +236,5 @@ fun HomeScreen(
     }
   }
 }
+
+private fun WorkoutCalorieEstimate.asCalories(): String = "~$minimumCalories–$maximumCalories kcal"

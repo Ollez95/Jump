@@ -1,6 +1,6 @@
 package com.example.jump.core.workout
 
-import com.example.jump.core.data.repository.WorkoutRepository
+import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.SessionPhase
@@ -10,6 +10,9 @@ import com.example.jump.core.model.WorkoutPlan
 import com.example.jump.core.model.WorkoutSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -74,11 +77,31 @@ class WorkoutCoordinatorTest {
     assertEquals(SessionPhase.COMPLETED, coordinator.state.value.phase)
     assertEquals(2_000L, coordinator.state.value.activeMillis)
   }
+
+  @Test fun concurrentFinishCallsPersistOnlyOneSession() = runTest {
+    val repository = FakeWorkoutRepository()
+    val coordinator = WorkoutCoordinator(repository)
+    coordinator.prepare(WorkoutPlan("finish-test", "Finish test", "", WorkoutKind.QUICK), now = 0)
+
+    val ids = listOf(
+      async { coordinator.finish() },
+      async { coordinator.finish() },
+    ).awaitAll()
+
+    assertEquals(listOf(1L, 1L), ids)
+    assertEquals(1, repository.savedSessions.size)
+    assertEquals(1L, coordinator.state.value.savedSessionId)
+  }
 }
 
 private class FakeWorkoutRepository : WorkoutRepository {
   override val sessions: Flow<List<WorkoutSession>> = MutableStateFlow(emptyList())
-  override suspend fun save(session: WorkoutSession): Long = 1
+  val savedSessions = mutableListOf<WorkoutSession>()
+  override suspend fun save(session: WorkoutSession): Long {
+    savedSessions += session
+    return savedSessions.size.toLong()
+  }
   override suspend fun session(id: Long): WorkoutSession? = null
   override suspend fun correctJumps(id: Long, jumps: Int) = Unit
+  override suspend fun deleteSession(id: Long) = Unit
 }

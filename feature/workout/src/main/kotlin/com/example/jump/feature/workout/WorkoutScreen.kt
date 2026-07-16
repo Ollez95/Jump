@@ -31,10 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewModelScope
 import com.example.jump.core.camera.CameraJumpPreview
 import com.example.jump.core.camera.CameraTrackingState
@@ -164,19 +162,15 @@ fun WorkoutScreen(
 private fun CameraCounterPanel(jumps: Int, onJump: () -> Unit, onCameraInactive: () -> Unit) {
   var trackingState by remember { mutableStateOf(CameraTrackingState.CALIBRATING) }
   val view = LocalView.current
-  val lifecycleOwner = LocalLifecycleOwner.current
-  DisposableEffect(view, lifecycleOwner) {
+  DisposableEffect(view) {
     val previous = view.keepScreenOn
     view.keepScreenOn = true
-    val observer = LifecycleEventObserver { _, event ->
-      if (event == Lifecycle.Event.ON_STOP) onCameraInactive()
-    }
-    lifecycleOwner.lifecycle.addObserver(observer)
     onDispose {
-      lifecycleOwner.lifecycle.removeObserver(observer)
       view.keepScreenOn = previous
-      onCameraInactive()
     }
+  }
+  LifecycleStartEffect(onCameraInactive) {
+    onStopOrDispose { onCameraInactive() }
   }
   val status = when (trackingState) {
     CameraTrackingState.CALIBRATING -> "CALIBRATING · STAND STILL"
@@ -231,7 +225,7 @@ private fun CompletionScreen(state: ActiveWorkoutState, onCorrect: (Int) -> Unit
           JumpMetric("Pace", "${state.bestPace}", "best jpm", Modifier.weight(1f))
         }
       }
-      JumpPrimaryButton("Back to today", onDone, Modifier.fillMaxWidth().padding(top = 22.dp))
+      JumpPrimaryButton("Done", onDone, Modifier.fillMaxWidth().padding(top = 22.dp))
     }
   }
 }

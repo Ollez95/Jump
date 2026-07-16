@@ -1,4 +1,19 @@
 <resources>
   <string name="workout_channel_name">Active workout</string>
   <string name="workout_channel_description">Jump count and workout controls</string>
+  <string name="workout_notification_default_title">Jump workout</string>
+  <string name="workout_notification_content">%1$d jumps • %2$d per min</string>
+  <string name="workout_action_resume">Resume</string>
+  <string name="workout_action_pause">Pause</string>
+  <string name="workout_action_finish">Finish</string>
+  <string name="workout_cue_get_ready">Get ready</string>
+  <string name="workout_cue_go">Go</string>
+  <string name="workout_cue_rest">Rest</string>
+  <string name="workout_cue_paused">Paused</string>
+  <string name="workout_cue_complete">Workout complete</string>
+  <string name="workout_cue_saved">Workout saved</string>
+  <plurals name="workout_jump_count">
+    <item quantity="one">%d jump</item>
+    <item quantity="other">%d jumps</item>
+  </plurals>
 </resources>
