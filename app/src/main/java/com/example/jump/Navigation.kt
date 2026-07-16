@@ -1,8 +1,5 @@
 package com.example.jump
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
@@ -11,12 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -41,33 +36,24 @@ import com.example.jump.ui.AppViewModel
 fun MainNavigation(viewModel: AppViewModel) {
   val backStack = rememberNavBackStack(Main)
   val current = backStack.lastOrNull()
-  val context = LocalContext.current
-  var pendingStart by remember { mutableStateOf<Pair<WorkoutPlan, CountingMode>?>(null) }
-  var permissionError by remember { mutableStateOf<CountingMode?>(null) }
-  val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-    val pending = pendingStart
-    val counterPermissionGranted = when (pending?.second) {
-      CountingMode.CAMERA -> result[Manifest.permission.CAMERA] == true || ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-      CountingMode.MOTION -> Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || result[Manifest.permission.ACTIVITY_RECOGNITION] == true ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
-      null -> false
-    }
-    if (counterPermissionGranted && pending != null) {
-      viewModel.start(pending.first, pending.second)
+  var permissionError by rememberSaveable { mutableStateOf<CountingMode?>(null) }
+  val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+    if (viewModel.startPendingWorkoutIfPermitted()) {
       if (backStack.lastOrNull() !is Active) backStack.add(Active)
       permissionError = null
-    } else permissionError = pending?.second
-    pendingStart = null
+    } else {
+      permissionError = viewModel.discardPendingWorkoutStart()
+    }
   }
 
   fun requestStart(plan: WorkoutPlan, countingMode: CountingMode) {
-    pendingStart = plan to countingMode
-    val required = buildList {
-      if (countingMode == CountingMode.CAMERA && ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.CAMERA)
-      if (countingMode == CountingMode.MOTION && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.ACTIVITY_RECOGNITION)
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) add(Manifest.permission.POST_NOTIFICATIONS)
+    val required = viewModel.prepareWorkoutStart(plan, countingMode)
+    if (required.isEmpty()) {
+      if (viewModel.startPendingWorkoutIfPermitted()) backStack.add(Active)
+      permissionError = null
+    } else {
+      launcher.launch(required.toTypedArray())
     }
-    if (required.isEmpty()) { viewModel.start(plan, countingMode); backStack.add(Active); pendingStart = null; permissionError = null } else launcher.launch(required.toTypedArray())
   }
 
   val showBottomBar = current is Main || current is History || current is Settings

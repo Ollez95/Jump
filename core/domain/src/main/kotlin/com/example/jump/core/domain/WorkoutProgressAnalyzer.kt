@@ -5,35 +5,6 @@ import java.util.Calendar
 import java.util.TimeZone
 import javax.inject.Inject
 
-data class TrainingDay(
-  val dayStartEpochMillis: Long,
-  val sessionCount: Int = 0,
-  val jumps: Int = 0,
-  val activeMillis: Long = 0,
-  val isFuture: Boolean = false,
-) {
-  val trained: Boolean get() = sessionCount > 0
-}
-
-data class TrainingWeek(
-  val weekStartEpochMillis: Long,
-  val sessionCount: Int,
-  val activeMillis: Long,
-  val jumps: Int,
-)
-
-data class WorkoutProgressReport(
-  val calendarDays: List<TrainingDay>,
-  val weeklyActivity: List<TrainingWeek>,
-  val totalSessions: Int,
-  val totalTrainingDays: Int,
-  val totalJumps: Int,
-  val totalActiveMillis: Long,
-  val currentStreakDays: Int,
-  val longestStreakDays: Int,
-  val calorieEstimate: WorkoutCalorieEstimate,
-)
-
 class WorkoutProgressAnalyzer @Inject constructor(
   private val calorieEstimator: WorkoutCalorieEstimator,
 ) {

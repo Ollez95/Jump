@@ -28,13 +28,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-
-enum class JumpNavigationIcon { TODAY, HISTORY, SETTINGS }
-
-data class JumpNavigationItem(
-  val label: String,
-  val icon: JumpNavigationIcon,
-)
+import com.example.jump.core.designsystem.preview.JumpComponentPreview
+import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 
 @Composable
 fun JumpNavigationBar(
@@ -74,6 +69,20 @@ fun JumpNavigationBar(
         }
       }
     }
+  }
+}
+
+@JumpLightDarkPreviews
+@Composable
+private fun JumpNavigationBarPreview() {
+  val items = listOf(
+    JumpNavigationItem("Today", JumpNavigationIcon.TODAY),
+    JumpNavigationItem("History", JumpNavigationIcon.HISTORY),
+    JumpNavigationItem("Settings", JumpNavigationIcon.SETTINGS),
+  )
+  JumpComponentPreview {
+    JumpNavigationBar(items = items, selectedIndex = 0, onItemSelected = {})
+    JumpNavigationBar(items = items, selectedIndex = 1, onItemSelected = {})
   }
 }
 

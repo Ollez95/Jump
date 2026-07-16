@@ -5,16 +5,6 @@ import com.example.jump.core.model.WorkoutSession
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-data class WorkoutCalorieEstimate(
-  val minimumCalories: Int = 0,
-  val maximumCalories: Int = 0,
-  val referenceWeightKg: Int = DEFAULT_REFERENCE_WEIGHT_KG,
-) {
-  companion object {
-    const val DEFAULT_REFERENCE_WEIGHT_KG = 70
-  }
-}
-
 /**
  * Estimates calories for active rope-jumping time using the standard MET formula.
  *

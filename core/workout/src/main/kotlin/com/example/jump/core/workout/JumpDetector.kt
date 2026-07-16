@@ -17,7 +17,7 @@ class JumpDetector(private val minimumJumpIntervalNanos: Long = 220_000_000L) {
 
   fun onGyroscope(x: Float, y: Float, z: Float) { gyroMagnitude = sqrt(x * x + y * y + z * z) }
 
-  fun onAccelerometer(timestampNanos: Long, x: Float, y: Float, z: Float): Detection? {
+  fun onAccelerometer(timestampNanos: Long, x: Float, y: Float, z: Float): JumpDetection? {
     val gravityAlpha = .90f
     gravityX = gravityAlpha * gravityX + (1 - gravityAlpha) * x
     gravityY = gravityAlpha * gravityY + (1 - gravityAlpha) * y
@@ -42,7 +42,10 @@ class JumpDetector(private val minimumJumpIntervalNanos: Long = 220_000_000L) {
     if (sampleCount > 15 && isPeak && separated) {
       lastJumpNanos = timestampNanos
       val signalConfidence = ((previous - threshold) / threshold).coerceIn(0f, 1f)
-      return Detection((.65f + signalConfidence * .25f + (gyroMagnitude / 8f).coerceIn(0f, .2f)).coerceAtMost(1f))
+      return JumpDetection(
+        (.65f + signalConfidence * .25f + (gyroMagnitude / 8f).coerceIn(0f, .2f))
+          .coerceAtMost(1f),
+      )
     }
     return null
   }
@@ -51,6 +54,4 @@ class JumpDetector(private val minimumJumpIntervalNanos: Long = 220_000_000L) {
     gravityX = 0f; gravityY = 0f; gravityZ = 0f; smoothed = 0f; previous = 0f; previousSlope = 0f
     noiseMean = 0f; noiseVariance = 0f; lastJumpNanos = Long.MIN_VALUE; sampleCount = 0; gyroMagnitude = 0f
   }
-
-  data class Detection(val confidence: Float)
 }

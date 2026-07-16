@@ -24,9 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import com.example.jump.core.designsystem.component.JumpBadge
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpDestructiveButton
@@ -40,37 +38,8 @@ import com.example.jump.core.designsystem.component.JumpTopAppBar
 import com.example.jump.core.designsystem.component.formatDate
 import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.domain.WorkoutCalorieEstimate
-import com.example.jump.core.domain.WorkoutCalorieEstimator
-import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.WorkoutSession
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-
-data class HistorySessionUiModel(
-  val session: WorkoutSession,
-  val calorieEstimate: WorkoutCalorieEstimate,
-)
-
-@HiltViewModel
-class HistoryViewModel @Inject constructor(
-  private val workouts: WorkoutRepository,
-  calorieEstimator: WorkoutCalorieEstimator,
-) : ViewModel() {
-  val sessions = workouts.sessions
-    .map { sessions -> sessions.map { HistorySessionUiModel(it, calorieEstimator.estimate(it)) } }
-    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-  fun deleteSession(id: Long) {
-    viewModelScope.launch { workouts.deleteSession(id) }
-  }
-}
 
 @Composable
 fun HistoryRoute(
@@ -154,38 +123,6 @@ fun HistoryScreen(
         onDelete(session.id)
       },
     )
-  }
-}
-
-data class SessionDetailUiState(
-  val session: WorkoutSession? = null,
-  val calorieEstimate: WorkoutCalorieEstimate = WorkoutCalorieEstimate(),
-)
-
-@HiltViewModel
-class SessionDetailViewModel @Inject constructor(
-  private val workouts: WorkoutRepository,
-  private val calorieEstimator: WorkoutCalorieEstimator,
-) : ViewModel() {
-  private val mutableState = MutableStateFlow(SessionDetailUiState())
-  val state = mutableState.asStateFlow()
-
-  fun load(id: Long) {
-    viewModelScope.launch {
-      val session = workouts.session(id)
-      mutableState.value = SessionDetailUiState(
-        session = session,
-        calorieEstimate = session?.let(calorieEstimator::estimate) ?: WorkoutCalorieEstimate(),
-      )
-    }
-  }
-
-  fun deleteSession(onDeleted: () -> Unit) {
-    val id = mutableState.value.session?.id ?: return
-    viewModelScope.launch {
-      workouts.deleteSession(id)
-      onDeleted()
-    }
   }
 }
 

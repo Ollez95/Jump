@@ -15,9 +15,9 @@ import kotlin.math.roundToInt
 class AdaptiveWorkoutPlanner @Inject constructor() {
   fun createDailyPlan(profile: UserProfile, recentSessions: List<WorkoutSession>): WorkoutPlan {
     val base = when (profile.experienceLevel) {
-      ExperienceLevel.BEGINNER -> BasePlan(6, 30, 30, 90)
-      ExperienceLevel.REGULAR -> BasePlan(8, 45, 20, 115)
-      ExperienceLevel.ADVANCED -> BasePlan(10, 60, 15, 140)
+      ExperienceLevel.BEGINNER -> AdaptiveWorkoutBasePlan(6, 30, 30, 90)
+      ExperienceLevel.REGULAR -> AdaptiveWorkoutBasePlan(8, 45, 20, 115)
+      ExperienceLevel.ADVANCED -> AdaptiveWorkoutBasePlan(10, 60, 15, 140)
     }
     val adjusted = when (profile.trainingGoal) {
       TrainingGoal.CONSISTENCY -> base.copy(rest = maxOf(base.rest, 20))
@@ -54,6 +54,4 @@ class AdaptiveWorkoutPlanner @Inject constructor() {
   }
 
   fun quickPlan() = WorkoutPlan("quick-jump", "Quick jump", "No timer. Just find your flow.", WorkoutKind.QUICK)
-
-  private data class BasePlan(val rounds: Int, val work: Int, val rest: Int, val cadence: Int)
 }

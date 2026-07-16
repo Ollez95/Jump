@@ -42,7 +42,7 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
     )
   }
 
-  @Synchronized fun tick(now: Long = System.currentTimeMillis()): Transition? {
+  @Synchronized fun tick(now: Long = System.currentTimeMillis()): WorkoutTransition? {
     val old = mutableState.value
     if (!old.isRunning || old.phase == SessionPhase.PAUSED) { lastTickMillis = now; return null }
     val delta = (now - lastTickMillis).coerceIn(0, 1_000); lastTickMillis = now
@@ -55,17 +55,21 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
     if (lastJumpMillis > 0 && now - lastJumpMillis > 3_000 && next.currentStreak != 0) {
       next = next.copy(currentStreak = 0, currentPace = 0); recentJumps.clear()
     }
-    var transition: Transition? = null
+    var transition: WorkoutTransition? = null
     if (next.intervalRemainingMillis == 0L) when (next.phase) {
       SessionPhase.PREPARING -> {
         next = if (next.plan?.kind == WorkoutKind.QUICK) next.copy(phase = SessionPhase.ACTIVE, intervalRemainingMillis = Long.MAX_VALUE / 2) else applyInterval(next, 0)
-        transition = Transition(next.phase, next.intervalIndex)
+        transition = WorkoutTransition(next.phase, next.intervalIndex)
       }
       SessionPhase.ACTIVE, SessionPhase.RESTING -> {
         val index = next.intervalIndex + 1
         if (index >= (next.plan?.intervals?.size ?: 0)) {
-          next = next.copy(phase = SessionPhase.COMPLETED); transition = Transition(SessionPhase.COMPLETED, index)
-        } else { next = applyInterval(next, index); transition = Transition(next.phase, index) }
+          next = next.copy(phase = SessionPhase.COMPLETED)
+          transition = WorkoutTransition(SessionPhase.COMPLETED, index)
+        } else {
+          next = applyInterval(next, index)
+          transition = WorkoutTransition(next.phase, index)
+        }
       }
       else -> Unit
     }
@@ -133,5 +137,4 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
   }
 
   fun clear() { mutableState.value = ActiveWorkoutState(); recentJumps.clear() }
-  data class Transition(val phase: SessionPhase, val intervalIndex: Int)
 }

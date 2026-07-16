@@ -19,9 +19,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpChoiceCard
 import com.example.jump.core.designsystem.component.JumpEyebrow
@@ -32,14 +29,6 @@ import com.example.jump.core.designsystem.component.JumpScreen
 import com.example.jump.core.model.ExperienceLevel
 import com.example.jump.core.model.TrainingGoal
 import com.example.jump.core.model.UserProfile
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.launch
-
-@HiltViewModel
-class OnboardingViewModel @Inject constructor(private val preferences: UserPreferencesRepository) : ViewModel() {
-  fun finish(profile: UserProfile) = viewModelScope.launch { preferences.saveProfile(profile) }
-}
 
 @Composable
 fun OnboardingRoute(viewModel: OnboardingViewModel = hiltViewModel()) {
