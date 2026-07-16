@@ -8,7 +8,7 @@ an app module that composes features and owns root navigation.
 
 ```text
 :app
-  ├── :feature:{onboarding,home,workout,history,settings}
+  ├── :feature:{onboarding,home,workout,workoutsetup,history,settings}
   ├── :core:designsystem
   ├── :core:workout
   └── :core:camera
@@ -28,6 +28,17 @@ an app module that composes features and owns root navigation.
 - `:core:workout` owns the sensor detector, session coordinator, controller, and foreground service.
 - `:core:camera` owns lifecycle-bound preview, on-device pose analysis, and camera jump detection.
 - `:core:designsystem` owns the theme, reusable components, and display formatting.
+
+## Configurable interval workouts
+
+`:feature:workoutsetup` owns the interval builder UI and screen state. Jump time, rest time, and
+round count are persisted through `UserPreferencesRepository`; the feature never accesses
+DataStore directly. `IntervalWorkoutPlanner` validates the configuration and converts it to the
+same ordered `WorkoutInterval` list used by adaptive daily plans.
+
+Custom plans therefore run through `WorkoutCoordinator` and `WorkoutService` without a second
+timer implementation. They inherit pause/resume, work/rest cues, foreground execution, camera or
+motion counting, metrics, completion, and Room-backed history persistence.
 
 ## Dependency rules
 

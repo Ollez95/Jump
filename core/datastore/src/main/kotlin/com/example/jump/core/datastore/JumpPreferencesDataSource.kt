@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.jump.core.model.CuePreferences
 import com.example.jump.core.model.CountingMode
 import com.example.jump.core.model.ExperienceLevel
+import com.example.jump.core.model.IntervalWorkoutConfig
 import com.example.jump.core.model.TrainingGoal
 import com.example.jump.core.model.UserProfile
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,6 +34,9 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
     val tones = booleanPreferencesKey("tones")
     val vibration = booleanPreferencesKey("vibration")
     val countingMode = stringPreferencesKey("counting_mode")
+    val customJumpSeconds = intPreferencesKey("custom_jump_seconds")
+    val customRestSeconds = intPreferencesKey("custom_rest_seconds")
+    val customRounds = intPreferencesKey("custom_rounds")
   }
 
   private val dataStore = context.jumpDataStore
@@ -55,6 +59,14 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
     values[Keys.countingMode]?.let { runCatching { CountingMode.valueOf(it) }.getOrNull() } ?: CountingMode.MOTION
   }
 
+  val intervalWorkoutConfig: Flow<IntervalWorkoutConfig> = safeData.map { values ->
+    IntervalWorkoutConfig(
+      jumpSeconds = values[Keys.customJumpSeconds] ?: IntervalWorkoutConfig.DEFAULT_JUMP_SECONDS,
+      restSeconds = values[Keys.customRestSeconds] ?: IntervalWorkoutConfig.DEFAULT_REST_SECONDS,
+      rounds = values[Keys.customRounds] ?: IntervalWorkoutConfig.DEFAULT_ROUNDS,
+    ).normalized()
+  }
+
   suspend fun saveProfile(profile: UserProfile) {
     dataStore.edit { values ->
       values[Keys.onboarding] = true
@@ -74,6 +86,15 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
 
   suspend fun setCountingMode(mode: CountingMode) {
     dataStore.edit { values -> values[Keys.countingMode] = mode.name }
+  }
+
+  suspend fun setIntervalWorkoutConfig(configuration: IntervalWorkoutConfig) {
+    val config = configuration.normalized()
+    dataStore.edit { values ->
+      values[Keys.customJumpSeconds] = config.jumpSeconds
+      values[Keys.customRestSeconds] = config.restSeconds
+      values[Keys.customRounds] = config.rounds
+    }
   }
 
   suspend fun resetOnboarding() { dataStore.edit { it[Keys.onboarding] = false } }

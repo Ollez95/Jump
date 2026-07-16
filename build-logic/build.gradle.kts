@@ -3,8 +3,8 @@ plugins { `kotlin-dsl` }
 group = "com.example.jump.buildlogic"
 
 dependencies {
-  compileOnly("com.android.tools.build:gradle:9.0.1")
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
+  compileOnly("com.android.tools.build:gradle:9.3.0")
+  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
 }
 
 gradlePlugin {

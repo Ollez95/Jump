@@ -22,6 +22,7 @@ import com.example.jump.core.data.repository.WorkoutRepository
 import com.example.jump.core.designsystem.component.JumpCard
 import com.example.jump.core.designsystem.component.JumpBadge
 import com.example.jump.core.designsystem.component.JumpChoiceCard
+import com.example.jump.core.designsystem.component.JumpDetailRow
 import com.example.jump.core.designsystem.component.JumpEyebrow
 import com.example.jump.core.designsystem.component.JumpHeader
 import com.example.jump.core.designsystem.component.JumpHeroCard
@@ -35,6 +36,7 @@ import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.domain.AdaptiveWorkoutPlanner
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
+import com.example.jump.core.model.IntervalWorkoutConfig
 import com.example.jump.core.model.SessionStatus
 import com.example.jump.core.model.UserProfile
 import com.example.jump.core.model.WorkoutPlan
@@ -54,6 +56,7 @@ data class HomeUiState(
   val dailyPlan: WorkoutPlan? = null,
   val active: ActiveWorkoutState = ActiveWorkoutState(),
   val countingMode: CountingMode = CountingMode.MOTION,
+  val intervalWorkoutConfig: IntervalWorkoutConfig = IntervalWorkoutConfig(),
 )
 
 @HiltViewModel
@@ -63,8 +66,14 @@ class HomeViewModel @Inject constructor(
   coordinator: WorkoutCoordinator,
   private val planner: AdaptiveWorkoutPlanner,
 ) : ViewModel() {
-  val uiState: StateFlow<HomeUiState> = combine(preferences.profile, workouts.sessions, coordinator.state, preferences.countingMode) { profile, sessions, active, countingMode ->
-    HomeUiState(profile, sessions, planner.createDailyPlan(profile, sessions), active, countingMode)
+  val uiState: StateFlow<HomeUiState> = combine(
+    preferences.profile,
+    workouts.sessions,
+    coordinator.state,
+    preferences.countingMode,
+    preferences.intervalWorkoutConfig,
+  ) { profile, sessions, active, countingMode, intervalConfig ->
+    HomeUiState(profile, sessions, planner.createDailyPlan(profile, sessions), active, countingMode, intervalConfig)
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
   val quickPlan: WorkoutPlan = planner.quickPlan()
   fun setCountingMode(mode: CountingMode) = viewModelScope.launch { preferences.setCountingMode(mode) }
@@ -75,10 +84,11 @@ fun HomeRoute(
   permissionError: CountingMode?,
   onStart: (WorkoutPlan, CountingMode) -> Unit,
   onContinue: () -> Unit,
+  onConfigureWorkout: () -> Unit,
   viewModel: HomeViewModel = hiltViewModel(),
 ) {
   val state by viewModel.uiState.collectAsStateWithLifecycle()
-  HomeScreen(state, viewModel.quickPlan, permissionError, onStart, onContinue, viewModel::setCountingMode)
+  HomeScreen(state, viewModel.quickPlan, permissionError, onStart, onContinue, onConfigureWorkout, viewModel::setCountingMode)
 }
 
 @Composable
@@ -88,6 +98,7 @@ fun HomeScreen(
   permissionError: CountingMode?,
   onStart: (WorkoutPlan, CountingMode) -> Unit,
   onContinue: () -> Unit,
+  onConfigureWorkout: () -> Unit,
   onCountingModeChange: (CountingMode) -> Unit,
 ) {
   val weekStart = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1_000L
@@ -149,6 +160,19 @@ fun HomeScreen(
           onAction = { dailyPlan?.let { onStart(it, state.countingMode) } },
           enabled = dailyPlan != null && !state.active.isRunning,
         )
+      }
+      item {
+        val config = state.intervalWorkoutConfig
+        JumpCard {
+          JumpEyebrow("Custom intervals")
+          Text("Build your own workout", style = MaterialTheme.typography.titleLarge)
+          Text("Set your jump time, recovery, and rounds. Your choices are remembered for next time.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          JumpDetailRow("Jump", "${config.jumpSeconds}s per round")
+          JumpDetailRow("Rest", if (config.restSeconds == 0) "Off" else "${config.restSeconds}s between rounds")
+          JumpDetailRow("Rounds", "${config.rounds}")
+          JumpDetailRow("Total", formatDuration(config.totalSeconds * 1_000L))
+          JumpPrimaryButton("Customize intervals", onConfigureWorkout, Modifier.fillMaxWidth(), enabled = !state.active.isRunning)
+        }
       }
       item {
         JumpSecondaryButton(

@@ -50,6 +50,7 @@ import com.example.jump.core.designsystem.component.JumpSecondaryButton
 import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
+import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.SessionPhase
 import com.example.jump.core.workout.WorkoutController
 import com.example.jump.core.workout.WorkoutCoordinator
@@ -104,6 +105,15 @@ fun WorkoutScreen(
     SessionPhase.PAUSED -> "PAUSED"
     else -> "WORKOUT"
   }
+  val intervalLabel = state.plan?.intervals?.takeIf { it.isNotEmpty() }?.let { intervals ->
+    val totalRounds = intervals.count { it.type == IntervalType.WORK }
+    val currentRound = intervals
+      .take(state.intervalIndex.coerceIn(0, intervals.lastIndex) + 1)
+      .count { it.type == IntervalType.WORK }
+      .coerceAtLeast(1)
+    val intervalName = if (state.phase == SessionPhase.RESTING) "Rest" else "Jump"
+    "$intervalName • Round $currentRound of $totalRounds"
+  }
   JumpScreen {
     Column(Modifier.fillMaxSize().padding(horizontal = 22.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween) {
       Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -130,7 +140,7 @@ fun WorkoutScreen(
           style = MaterialTheme.typography.headlineMedium,
         )
         Text(
-          if (state.phase == SessionPhase.PREPARING) "Starting in seconds" else "Current interval",
+          if (state.phase == SessionPhase.PREPARING) "Starting in seconds" else intervalLabel ?: "Open session",
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -8,7 +8,8 @@ plugins {
 
 android {
     namespace = "com.example.jump"
-    compileSdk = 36
+    compileSdk = 37
+    compileSdkMinor = 1
     defaultConfig {
         applicationId = "com.example.jump"
         minSdk = 24
@@ -91,6 +92,7 @@ dependencies {
   implementation(project(":feature:onboarding"))
   implementation(project(":feature:home"))
   implementation(project(":feature:workout"))
+  implementation(project(":feature:workoutsetup"))
   implementation(project(":feature:history"))
   implementation(project(":feature:settings"))
   implementation(libs.dagger.hilt.android)

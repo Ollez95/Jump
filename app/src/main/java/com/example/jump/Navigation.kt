@@ -32,6 +32,7 @@ import com.example.jump.feature.history.SessionDetailRoute
 import com.example.jump.feature.home.HomeRoute
 import com.example.jump.feature.settings.SettingsRoute
 import com.example.jump.feature.workout.WorkoutRoute
+import com.example.jump.feature.workoutsetup.WorkoutSetupRoute
 import com.example.jump.ui.AppViewModel
 
 @Composable
@@ -88,7 +89,20 @@ fun MainNavigation(viewModel: AppViewModel) {
       onBack = { backStack.removeLastOrNull() },
       entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
       entryProvider = entryProvider {
-        entry<Main> { HomeRoute(permissionError = permissionError, onStart = ::requestStart, onContinue = { if (backStack.lastOrNull() !is Active) backStack.add(Active) }) }
+        entry<Main> {
+          HomeRoute(
+            permissionError = permissionError,
+            onStart = ::requestStart,
+            onContinue = { if (backStack.lastOrNull() !is Active) backStack.add(Active) },
+            onConfigureWorkout = { backStack.add(WorkoutSetup) },
+          )
+        }
+        entry<WorkoutSetup> {
+          WorkoutSetupRoute(
+            onBack = { backStack.removeLastOrNull() },
+            onStart = ::requestStart,
+          )
+        }
         entry<Active> { WorkoutRoute(onDone = { backStack.clear(); backStack.add(Main) }) }
         entry<History> { HistoryRoute(onOpen = { backStack.add(SessionDetail(it)) }) }
         entry<Settings> { SettingsRoute() }

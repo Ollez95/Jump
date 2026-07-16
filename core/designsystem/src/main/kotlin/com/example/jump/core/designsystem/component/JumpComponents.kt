@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -272,6 +274,51 @@ fun JumpNumberChip(value: Int, selected: Boolean, onClick: () -> Unit, modifier:
       selectedBorderColor = MaterialTheme.colorScheme.primary,
     ),
   )
+}
+
+@Composable
+fun JumpValueStepper(
+  title: String,
+  value: String,
+  description: String,
+  onDecrease: () -> Unit,
+  onIncrease: () -> Unit,
+  modifier: Modifier = Modifier,
+  decreaseEnabled: Boolean = true,
+  increaseEnabled: Boolean = true,
+) {
+  Surface(
+    modifier = modifier.fillMaxWidth(),
+    shape = MaterialTheme.shapes.medium,
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
+  ) {
+    Row(
+      Modifier.padding(horizontal = JumpSpacing.md, vertical = 14.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(JumpSpacing.sm),
+    ) {
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        Text(description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      }
+      OutlinedButton(
+        onClick = onDecrease,
+        enabled = decreaseEnabled,
+        modifier = Modifier.size(44.dp).semantics { contentDescription = "Decrease $title" },
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
+      ) { Text("−", style = MaterialTheme.typography.titleLarge) }
+      Text(value, modifier = Modifier.width(58.dp), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+      OutlinedButton(
+        onClick = onIncrease,
+        enabled = increaseEnabled,
+        modifier = Modifier.size(44.dp).semantics { contentDescription = "Increase $title" },
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
+      ) { Text("+", style = MaterialTheme.typography.titleLarge) }
+    }
+  }
 }
 
 @Composable

@@ -34,6 +34,7 @@ import com.example.jump.core.designsystem.component.JumpStatCard
 import com.example.jump.core.designsystem.component.formatDate
 import com.example.jump.core.designsystem.component.formatDuration
 import com.example.jump.core.model.WorkoutSession
+import com.example.jump.core.model.IntervalType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,6 +137,13 @@ fun SessionDetailScreen(session: WorkoutSession?, onBack: () -> Unit) {
             JumpDetailRow("Average pace", "${session.metrics.averagePace} jpm")
             JumpDetailRow("Longest streak", "${session.metrics.longestStreak}")
             JumpDetailRow("Status", session.status.name.lowercase().replaceFirstChar { it.uppercase() })
+            if (session.intervals.isNotEmpty()) {
+              val work = session.intervals.firstOrNull { it.type == IntervalType.WORK }
+              val rest = session.intervals.firstOrNull { it.type == IntervalType.REST }
+              JumpDetailRow("Rounds", "${session.intervals.count { it.type == IntervalType.WORK }}")
+              JumpDetailRow("Jump time", work?.let { "${it.durationSeconds}s" }.orEmpty())
+              JumpDetailRow("Rest time", rest?.let { "${it.durationSeconds}s" } ?: "Off")
+            }
           }
         }
       }

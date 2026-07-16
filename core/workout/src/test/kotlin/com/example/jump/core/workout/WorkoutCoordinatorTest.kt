@@ -2,7 +2,9 @@ package com.example.jump.core.workout
 
 import com.example.jump.core.data.repository.WorkoutRepository
 import com.example.jump.core.model.CountingMode
+import com.example.jump.core.model.IntervalType
 import com.example.jump.core.model.SessionPhase
+import com.example.jump.core.model.WorkoutInterval
 import com.example.jump.core.model.WorkoutKind
 import com.example.jump.core.model.WorkoutPlan
 import com.example.jump.core.model.WorkoutSession
@@ -37,6 +39,40 @@ class WorkoutCoordinatorTest {
 
     assertEquals(SessionPhase.PAUSED, coordinator.state.value.phase)
     assertEquals(SessionPhase.PREPARING, coordinator.state.value.phaseBeforePause)
+  }
+
+  @Test fun configuredWorkoutTransitionsThroughEveryJumpAndRestRound() {
+    val coordinator = WorkoutCoordinator(FakeWorkoutRepository())
+    val plan = WorkoutPlan(
+      id = "custom-test",
+      title = "Custom intervals",
+      subtitle = "",
+      kind = WorkoutKind.CUSTOM,
+      intervals = listOf(
+        WorkoutInterval(IntervalType.WORK, 1),
+        WorkoutInterval(IntervalType.REST, 1),
+        WorkoutInterval(IntervalType.WORK, 1),
+      ),
+    )
+    coordinator.prepare(plan, now = 0)
+
+    coordinator.tick(1_000)
+    coordinator.tick(2_000)
+    coordinator.tick(3_000)
+    assertEquals(SessionPhase.ACTIVE, coordinator.state.value.phase)
+    assertEquals(0, coordinator.state.value.intervalIndex)
+
+    coordinator.tick(4_000)
+    assertEquals(SessionPhase.RESTING, coordinator.state.value.phase)
+    assertEquals(1, coordinator.state.value.intervalIndex)
+
+    coordinator.tick(5_000)
+    assertEquals(SessionPhase.ACTIVE, coordinator.state.value.phase)
+    assertEquals(2, coordinator.state.value.intervalIndex)
+
+    coordinator.tick(6_000)
+    assertEquals(SessionPhase.COMPLETED, coordinator.state.value.phase)
+    assertEquals(2_000L, coordinator.state.value.activeMillis)
   }
 }
 
