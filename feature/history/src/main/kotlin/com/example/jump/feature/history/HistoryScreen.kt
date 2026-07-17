@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,8 +31,8 @@ import com.example.jump.core.designsystem.component.button.JumpPrimaryButton
 import com.example.jump.core.designsystem.component.card.JumpCard
 import com.example.jump.core.designsystem.component.card.JumpStatCard
 import com.example.jump.core.designsystem.component.feedback.JumpEmptyState
-import com.example.jump.core.designsystem.component.indicator.JumpBadge
 import com.example.jump.core.designsystem.component.layout.JumpDetailRow
+import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.component.layout.JumpHeader
 import com.example.jump.core.designsystem.component.layout.JumpScreen
 import com.example.jump.core.designsystem.component.navigation.JumpTopAppBar
@@ -48,7 +49,7 @@ fun HistoryRoute(
   viewModel: HistoryViewModel = hiltViewModel(),
 ) {
   val sessions by viewModel.sessions.collectAsStateWithLifecycle()
-  HistoryScreen(sessions, onOpen, onProgress, viewModel::deleteSession)
+  HistoryScreen(sessions, onOpen, onProgress)
 }
 
 @Composable
@@ -56,28 +57,38 @@ fun HistoryScreen(
   sessions: List<HistorySessionUiModel>,
   onOpen: (Long) -> Unit,
   onProgress: () -> Unit,
-  onDelete: (Long) -> Unit,
 ) {
-  var pendingDeletion by remember { mutableStateOf<WorkoutSession?>(null) }
   JumpScreen {
     LazyColumn(
       Modifier.fillMaxSize(),
       contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       item {
         JumpHeader(
-          eyebrow = "Your progress",
-          title = "Workout history",
-          description = "Every session is proof of momentum.",
-          brandMark = true,
+          eyebrow = stringResource(R.string.history_activity),
+          title = stringResource(R.string.history_title),
+          description = stringResource(R.string.history_description),
         )
       }
       item {
-        JumpPrimaryButton("View progress & calendar", onProgress, Modifier.fillMaxWidth())
+        JumpCard {
+          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            ActivityMetric(stringResource(R.string.history_sessions), "${sessions.size}", Modifier.weight(1f))
+            ActivityMetric(
+              stringResource(R.string.history_total_jumps),
+              "${sessions.sumOf { it.session.metrics.correctedJumps }}",
+              Modifier.weight(1f),
+            )
+          }
+          JumpPrimaryButton(stringResource(R.string.history_insights), onProgress, Modifier.fillMaxWidth())
+        }
       }
       if (sessions.isEmpty()) item {
         JumpEmptyState("Your first session starts here", "Completed workouts will collect here with jumps, pace, time, and streak details.")
+      }
+      if (sessions.isNotEmpty()) {
+        item { JumpEyebrow(stringResource(R.string.history_recent_workouts)) }
       }
       items(sessions, key = { it.session.id }) { item ->
         val session = item.session
@@ -91,38 +102,27 @@ fun HistoryScreen(
                 Text(session.title, style = MaterialTheme.typography.titleLarge)
                 Text(formatDate(session.startedAtEpochMillis), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
               }
-              JumpBadge("${session.metrics.correctedJumps} JUMPS")
+              Column(horizontalAlignment = Alignment.End) {
+                Text("${session.metrics.correctedJumps}", style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(R.string.history_jumps_unit), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+              }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
               Text(formatDuration(session.durationMillis), style = MaterialTheme.typography.labelLarge)
               Text("${session.metrics.averagePace} avg jpm", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            JumpDetailRow(
-              "Estimated burn (${item.calorieEstimate.referenceWeightKg} kg)",
-              item.calorieEstimate.asCalories(),
-            )
-          }
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(
-              onClick = { pendingDeletion = session },
-              colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-            ) {
-              Text("Delete session")
             }
           }
         }
       }
     }
   }
-  pendingDeletion?.let { session ->
-    DeleteSessionDialog(
-      sessionTitle = session.title,
-      onDismiss = { pendingDeletion = null },
-      onConfirm = {
-        pendingDeletion = null
-        onDelete(session.id)
-      },
-    )
+}
+
+@Composable
+private fun ActivityMetric(label: String, value: String, modifier: Modifier = Modifier) {
+  Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(value, style = MaterialTheme.typography.headlineSmall)
   }
 }
 

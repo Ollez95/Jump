@@ -1,9 +1,6 @@
 package com.example.jump.core.designsystem.component.card
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.component.button.JumpPrimaryButton
 import com.example.jump.core.designsystem.component.indicator.JumpBadge
@@ -41,50 +36,30 @@ fun JumpHeroCard(
   val colors = MaterialTheme.colorScheme
   Card(
     modifier = modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.extraLarge,
-    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    shape = MaterialTheme.shapes.large,
+    colors = CardDefaults.cardColors(containerColor = colors.primaryContainer),
     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
   ) {
-    Box(
-      Modifier.background(
-        Brush.linearGradient(
-          listOf(colors.primaryContainer, colors.secondaryContainer.copy(alpha = 0.88f)),
-        ),
-      ),
+    Column(
+      Modifier.padding(JumpSpacing.xl),
+      verticalArrangement = Arrangement.spacedBy(JumpSpacing.sm),
     ) {
-      Canvas(Modifier.matchParentSize()) {
-        drawCircle(
-          colors.onPrimaryContainer.copy(alpha = 0.055f),
-          radius = size.minDimension * 0.55f,
-          center = center.copy(x = size.width * 0.95f, y = size.height * 0.15f),
-        )
-        drawCircle(
-          colors.onPrimaryContainer.copy(alpha = 0.045f),
-          radius = size.minDimension * 0.34f,
-          center = center.copy(x = size.width * 0.05f, y = size.height * 0.92f),
-        )
-      }
-      Column(
-        Modifier.padding(JumpSpacing.xl),
-        verticalArrangement = Arrangement.spacedBy(JumpSpacing.sm),
+      Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          JumpEyebrow(eyebrow)
-          meta?.let { JumpBadge(it, accent = colors.onPrimaryContainer) }
-        }
-        Text(title, style = MaterialTheme.typography.headlineMedium, color = colors.onPrimaryContainer)
-        Text(
-          description,
-          style = MaterialTheme.typography.bodyLarge,
-          color = colors.onPrimaryContainer.copy(alpha = 0.76f),
-        )
-        Spacer(Modifier.height(JumpSpacing.xs))
-        JumpPrimaryButton(actionLabel, onAction, Modifier.fillMaxWidth(), enabled)
+        JumpEyebrow(eyebrow)
+        meta?.let { JumpBadge(it, accent = colors.onPrimaryContainer) }
       }
+      Text(title, style = MaterialTheme.typography.headlineSmall, color = colors.onPrimaryContainer)
+      Text(
+        description,
+        style = MaterialTheme.typography.bodyMedium,
+        color = colors.onPrimaryContainer.copy(alpha = 0.76f),
+      )
+      Spacer(Modifier.height(JumpSpacing.xxs))
+      JumpPrimaryButton(actionLabel, onAction, Modifier.fillMaxWidth(), enabled)
     }
   }
 }

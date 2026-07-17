@@ -1,0 +1,14 @@
+<resources>
+    <string name="progress_eyebrow">Insights</string>
+    <string name="progress_description">Patterns from your completed workouts.</string>
+    <string name="progress_overview">Overview</string>
+    <string name="progress_current_streak">Current streak</string>
+    <string name="progress_longest_streak">Longest streak</string>
+    <string name="progress_sessions">Sessions</string>
+    <string name="progress_jumps">Jumps</string>
+    <string name="progress_active_time">Active time</string>
+    <string name="progress_estimated_calories">Estimated calories</string>
+    <string name="progress_days">%1$d days</string>
+    <string name="progress_calories">%1$d–%2$d kcal</string>
+    <string name="progress_calorie_disclaimer">Calories are estimated for %1$d kg from recorded active jump time at a slow-to-fast pace. Actual burn varies by body weight, pace, technique, and fitness.</string>
+</resources>

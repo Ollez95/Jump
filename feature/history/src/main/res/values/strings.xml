@@ -1,0 +1,10 @@
+<resources>
+    <string name="history_activity">Activity</string>
+    <string name="history_title">Your workouts</string>
+    <string name="history_description">Review recent sessions or open your longer-term progress.</string>
+    <string name="history_sessions">Sessions</string>
+    <string name="history_total_jumps">Total jumps</string>
+    <string name="history_insights">Insights &amp; calendar</string>
+    <string name="history_recent_workouts">Recent workouts</string>
+    <string name="history_jumps_unit">jumps</string>
+</resources>

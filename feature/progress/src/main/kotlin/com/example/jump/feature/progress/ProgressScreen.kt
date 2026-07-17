@@ -23,13 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.jump.core.designsystem.component.card.JumpCard
-import com.example.jump.core.designsystem.component.card.JumpStatCard
 import com.example.jump.core.designsystem.component.feedback.JumpInfoBanner
 import com.example.jump.core.designsystem.component.layout.JumpDetailRow
 import com.example.jump.core.designsystem.component.layout.JumpHeader
@@ -69,10 +69,9 @@ fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
     ) {
       item {
         JumpHeader(
-          eyebrow = "Training insights",
+          eyebrow = stringResource(R.string.progress_eyebrow),
           title = "Your progress",
-          description = "See the rhythm you are building, one training day at a time.",
-          brandMark = true,
+          description = stringResource(R.string.progress_description),
         )
       }
       if (report == null) {
@@ -82,9 +81,21 @@ fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
           item { JumpInfoBanner("No training activity yet", "Complete a jump session and your calendar and charts will begin to fill in.") }
         }
         item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Current streak", "${report.currentStreakDays}", "days", Modifier.weight(1f), highlighted = report.currentStreakDays > 0)
-            JumpStatCard("Longest streak", "${report.longestStreakDays}", "days", Modifier.weight(1f))
+          JumpCard {
+            Text(stringResource(R.string.progress_overview), style = MaterialTheme.typography.titleLarge)
+            JumpDetailRow(stringResource(R.string.progress_current_streak), stringResource(R.string.progress_days, report.currentStreakDays))
+            JumpDetailRow(stringResource(R.string.progress_longest_streak), stringResource(R.string.progress_days, report.longestStreakDays))
+            JumpDetailRow(stringResource(R.string.progress_sessions), "${report.totalSessions}")
+            JumpDetailRow(stringResource(R.string.progress_jumps), "${report.totalJumps}")
+            JumpDetailRow(stringResource(R.string.progress_active_time), formatActiveTime(report.totalActiveMillis))
+            JumpDetailRow(
+              stringResource(R.string.progress_estimated_calories),
+              stringResource(
+                R.string.progress_calories,
+                report.calorieEstimate.minimumCalories,
+                report.calorieEstimate.maximumCalories,
+              ),
+            )
           }
         }
         item {
@@ -104,25 +115,8 @@ fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
           }
         }
         item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Sessions", "${report.totalSessions}", "all time", Modifier.weight(1f), highlighted = report.totalSessions > 0)
-            JumpStatCard("Jumps", "${report.totalJumps}", "all time", Modifier.weight(1f))
-          }
-        }
-        item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Active time", formatActiveTime(report.totalActiveMillis), "all time", Modifier.weight(1f))
-            JumpStatCard(
-              "Calories",
-              "${report.calorieEstimate.minimumCalories}–${report.calorieEstimate.maximumCalories}",
-              "kcal · ${report.calorieEstimate.referenceWeightKg} kg",
-              Modifier.weight(1f),
-            )
-          }
-        }
-        item {
           Text(
-            "Calories are estimated from recorded active jump time at a slow-to-fast pace. Actual burn varies by body weight, pace, technique, and fitness.",
+            stringResource(R.string.progress_calorie_disclaimer, report.calorieEstimate.referenceWeightKg),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )

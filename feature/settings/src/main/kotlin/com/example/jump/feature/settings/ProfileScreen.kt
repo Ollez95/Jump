@@ -45,7 +45,6 @@ fun ProfileScreen(
           eyebrow = stringResource(R.string.profile_eyebrow),
           title = stringResource(R.string.profile_title),
           description = stringResource(R.string.profile_description),
-          brandMark = true,
         )
       }
       item {

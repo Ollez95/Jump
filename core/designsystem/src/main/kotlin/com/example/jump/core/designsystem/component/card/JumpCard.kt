@@ -1,6 +1,5 @@
 package com.example.jump.core.designsystem.component.card
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,9 +25,8 @@ fun JumpCard(
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.large,
+    shape = MaterialTheme.shapes.medium,
     colors = CardDefaults.cardColors(containerColor = containerColor),
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
   ) {
     Column(

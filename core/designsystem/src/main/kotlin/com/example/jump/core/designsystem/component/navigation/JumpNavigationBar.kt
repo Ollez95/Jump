@@ -1,6 +1,5 @@
 package com.example.jump.core.designsystem.component.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
@@ -42,9 +40,9 @@ fun JumpNavigationBar(
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
-    color = MaterialTheme.colorScheme.surfaceContainer,
-    tonalElevation = 3.dp,
-    shadowElevation = 8.dp,
+    color = MaterialTheme.colorScheme.background,
+    tonalElevation = 0.dp,
+    shadowElevation = 0.dp,
   ) {
     Row(
       Modifier
@@ -56,11 +54,10 @@ fun JumpNavigationBar(
     ) {
       items.forEachIndexed { index, item ->
         val selected = selectedIndex == index
-        val foreground = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+        val foreground = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         Column(
           Modifier
             .weight(1f)
-            .background(if (selected) MaterialTheme.colorScheme.primaryContainer else androidx.compose.ui.graphics.Color.Transparent, RoundedCornerShape(18.dp))
             .selectable(selected = selected, onClick = { onItemSelected(index) }, role = Role.Tab)
             .padding(vertical = 9.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
