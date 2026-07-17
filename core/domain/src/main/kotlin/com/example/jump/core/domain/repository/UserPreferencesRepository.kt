@@ -16,5 +16,4 @@ interface UserPreferencesRepository {
   suspend fun setCuePreferences(cues: CuePreferences)
   suspend fun setCountingMode(mode: CountingMode)
   suspend fun setIntervalWorkoutConfig(configuration: IntervalWorkoutConfig)
-  suspend fun resetOnboarding()
 }

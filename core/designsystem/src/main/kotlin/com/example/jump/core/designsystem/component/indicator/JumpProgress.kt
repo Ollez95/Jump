@@ -11,14 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 
 @Composable
 fun JumpProgress(progress: Float, modifier: Modifier = Modifier) {
+  val normalizedProgress = progress.coerceIn(0f, 1f)
   val animatedProgress by animateFloatAsState(
-    progress.coerceIn(0f, 1f),
+    normalizedProgress,
     label = "jump-progress",
   )
   Box(
@@ -26,7 +30,10 @@ fun JumpProgress(progress: Float, modifier: Modifier = Modifier) {
       .fillMaxWidth()
       .height(9.dp)
       .clip(CircleShape)
-      .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+      .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+      .semantics {
+        progressBarRangeInfo = ProgressBarRangeInfo(normalizedProgress, 0f..1f)
+      },
   ) {
     Box(
       Modifier

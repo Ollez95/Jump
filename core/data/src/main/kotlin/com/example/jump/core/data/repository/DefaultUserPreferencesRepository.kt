@@ -33,8 +33,4 @@ class DefaultUserPreferencesRepository @Inject constructor(
   override suspend fun setIntervalWorkoutConfig(configuration: IntervalWorkoutConfig) {
     dataSource.setIntervalWorkoutConfig(configuration)
   }
-
-  override suspend fun resetOnboarding() {
-    dataSource.resetOnboarding()
-  }
 }
