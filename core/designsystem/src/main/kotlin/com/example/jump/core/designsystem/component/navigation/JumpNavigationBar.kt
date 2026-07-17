@@ -1,6 +1,5 @@
 package com.example.jump.core.designsystem.component.navigation
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,15 +16,18 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
@@ -78,7 +80,7 @@ private fun JumpNavigationBarPreview() {
   val items = listOf(
     JumpNavigationItem("Today", JumpNavigationIcon.TODAY),
     JumpNavigationItem("History", JumpNavigationIcon.HISTORY),
-    JumpNavigationItem("Settings", JumpNavigationIcon.SETTINGS),
+    JumpNavigationItem("Profile", JumpNavigationIcon.PROFILE),
   )
   JumpComponentPreview {
     JumpNavigationBar(items = items, selectedIndex = 0, onItemSelected = {})
@@ -88,35 +90,16 @@ private fun JumpNavigationBarPreview() {
 
 @Composable
 private fun JumpNavigationGlyph(icon: JumpNavigationIcon, color: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
-  val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
-  Canvas(modifier) {
-    val stroke = 1.8.dp.toPx()
-    when (icon) {
-      JumpNavigationIcon.TODAY -> {
-        val path = Path().apply {
-          moveTo(size.width * .14f, size.height * .47f)
-          lineTo(size.width * .5f, size.height * .17f)
-          lineTo(size.width * .86f, size.height * .47f)
-          lineTo(size.width * .78f, size.height * .84f)
-          lineTo(size.width * .22f, size.height * .84f)
-          close()
-        }
-        drawPath(path, color, style = Stroke(stroke, cap = StrokeCap.Round))
-      }
-      JumpNavigationIcon.HISTORY -> {
-        drawCircle(color, radius = size.minDimension * .34f, style = Stroke(stroke))
-        drawLine(color, center, center.copy(y = size.height * .28f), stroke, StrokeCap.Round)
-        drawLine(color, center, center.copy(x = size.width * .68f, y = size.height * .58f), stroke, StrokeCap.Round)
-      }
-      JumpNavigationIcon.SETTINGS -> {
-        val ys = listOf(.25f, .5f, .75f)
-        val xs = listOf(.38f, .65f, .45f)
-        ys.forEachIndexed { index, y ->
-          drawLine(color, start = center.copy(x = size.width * .14f, y = size.height * y), end = center.copy(x = size.width * .86f, y = size.height * y), strokeWidth = stroke, cap = StrokeCap.Round)
-          drawCircle(surfaceColor, radius = 3.2.dp.toPx(), center = center.copy(x = size.width * xs[index], y = size.height * y))
-          drawCircle(color, radius = 3.2.dp.toPx(), center = center.copy(x = size.width * xs[index], y = size.height * y), style = Stroke(stroke))
-        }
-      }
-    }
-  }
+  Icon(
+    imageVector = icon.imageVector(),
+    contentDescription = null,
+    tint = color,
+    modifier = modifier,
+  )
+}
+
+private fun JumpNavigationIcon.imageVector(): ImageVector = when (this) {
+  JumpNavigationIcon.TODAY -> Icons.Rounded.Home
+  JumpNavigationIcon.HISTORY -> Icons.Rounded.History
+  JumpNavigationIcon.PROFILE -> Icons.Rounded.Person
 }

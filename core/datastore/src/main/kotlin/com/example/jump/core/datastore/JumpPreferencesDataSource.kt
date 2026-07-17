@@ -85,8 +85,4 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
       values[JumpPreferencesKeys.customRounds] = config.rounds
     }
   }
-
-  suspend fun resetOnboarding() {
-    dataStore.edit { it[JumpPreferencesKeys.onboarding] = false }
-  }
 }

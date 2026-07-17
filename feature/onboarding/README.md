@@ -4,7 +4,7 @@ First-run setup that turns a few training choices into the profile used by Jump'
 
 ## Experience
 
-The screen asks for:
+The three-screen flow asks for:
 
 - experience level: beginner, regular, or advanced;
 - primary goal: consistency, endurance, or speed;
@@ -16,6 +16,8 @@ The screen asks for:
 
 - `OnboardingRoute` wires the Hilt ViewModel to UI.
 - `OnboardingScreen` is a stateless, callback-driven composable suitable for previews and UI tests.
+- `TrainingLevelScreen`, `TrainingGoalScreen`, and `TrainingScheduleScreen` are separate stateless screen files.
+- Every onboarding screen has paired light/dark Compose previews.
 - `OnboardingViewModel` performs the persistence action.
 
 ## Dependencies
@@ -34,4 +36,3 @@ The feature does not navigate directly and never accesses DataStore.
 ```
 
 [Back to the module catalog](../../README.md#modules)
-

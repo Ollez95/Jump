@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -27,7 +28,8 @@ import com.example.jump.feature.history.HistoryRoute
 import com.example.jump.feature.history.SessionDetailRoute
 import com.example.jump.feature.home.HomeRoute
 import com.example.jump.feature.progress.ProgressRoute
-import com.example.jump.feature.settings.SettingsRoute
+import com.example.jump.feature.settings.ProfileRoute
+import com.example.jump.feature.settings.TrainingProfileRoute
 import com.example.jump.feature.workout.WorkoutRoute
 import com.example.jump.feature.workoutsetup.WorkoutSetupRoute
 import com.example.jump.ui.AppViewModel
@@ -56,11 +58,11 @@ fun MainNavigation(viewModel: AppViewModel) {
     }
   }
 
-  val showBottomBar = current is Main || current is History || current is Settings
+  val showBottomBar = current is Main || current is History || current is Profile
   val tabs: List<Pair<NavKey, JumpNavigationItem>> = listOf(
-    Main to JumpNavigationItem("Today", JumpNavigationIcon.TODAY),
-    History to JumpNavigationItem("History", JumpNavigationIcon.HISTORY),
-    Settings to JumpNavigationItem("Settings", JumpNavigationIcon.SETTINGS),
+    Main to JumpNavigationItem(stringResource(R.string.navigation_today), JumpNavigationIcon.TODAY),
+    History to JumpNavigationItem(stringResource(R.string.navigation_history), JumpNavigationIcon.HISTORY),
+    Profile to JumpNavigationItem(stringResource(R.string.navigation_profile), JumpNavigationIcon.PROFILE),
   )
   Scaffold(bottomBar = {
     if (showBottomBar) {
@@ -99,7 +101,13 @@ fun MainNavigation(viewModel: AppViewModel) {
           )
         }
         entry<Progress> { ProgressRoute(onBack = { backStack.removeLastOrNull() }) }
-        entry<Settings> { SettingsRoute() }
+        entry<Profile> { ProfileRoute(onEditTrainingProfile = { backStack.add(TrainingProfile) }) }
+        entry<TrainingProfile> {
+          TrainingProfileRoute(
+            onBack = { backStack.removeLastOrNull() },
+            onSaved = { backStack.removeLastOrNull() },
+          )
+        }
         entry<SessionDetail> { key -> SessionDetailRoute(sessionId = key.sessionId, onBack = { backStack.removeLastOrNull() }) }
       },
     )

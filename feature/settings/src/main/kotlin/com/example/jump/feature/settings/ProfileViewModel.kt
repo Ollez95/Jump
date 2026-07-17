@@ -8,18 +8,23 @@ import com.example.jump.core.model.CuePreferences
 import com.example.jump.core.model.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class ProfileViewModel @Inject constructor(
   private val preferences: UserPreferencesRepository,
 ) : ViewModel() {
+  private val profileSavedEvents = Channel<Unit>(Channel.BUFFERED)
+  val profileSaved = profileSavedEvents.receiveAsFlow()
+
   val profile = preferences.profile.stateIn(
     viewModelScope,
     SharingStarted.WhileSubscribed(5_000),
-    UserProfile(),
+    UserProfile(onboardingComplete = true),
   )
   val cues = preferences.cues.stateIn(
     viewModelScope,
@@ -40,7 +45,9 @@ class SettingsViewModel @Inject constructor(
     preferences.setCountingMode(mode)
   }
 
-  fun resetOnboarding() = viewModelScope.launch {
-    preferences.resetOnboarding()
-  }
+  fun updateTrainingProfile(profile: UserProfile) =
+    viewModelScope.launch {
+      preferences.saveProfile(profile.copy(onboardingComplete = true))
+      profileSavedEvents.send(Unit)
+    }
 }

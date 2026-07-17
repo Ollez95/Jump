@@ -1,4 +1,4 @@
-# `:feature:settings`
+# `:feature:settings` (Profile)
 
 User-facing configuration for counting, coaching cues, and the adaptive training profile.
 
@@ -6,15 +6,17 @@ User-facing configuration for counting, coaching cues, and the adaptive training
 
 - Select motion or camera as the default counting method.
 - Enable or disable voice coaching, transition tones, and vibration.
-- Review current experience, training goal, and weekly frequency.
-- Reset onboarding to change the training profile.
+- Review current experience, training goal, and weekly frequency in a profile summary.
+- Open the dedicated training-profile editor without returning to onboarding.
 - Read privacy and placement guidance for each counting method.
 
 ## Public surface
 
-- `SettingsRoute` collects profile, cue, and counting-mode flows.
-- `SettingsScreen` is callback-driven UI.
-- `SettingsViewModel` delegates updates to `UserPreferencesRepository`.
+- `ProfileRoute` collects profile, cue, and counting-mode flows for the bottom tab.
+- `TrainingProfileRoute` hosts the dedicated profile editor.
+- `ProfileScreen` and `TrainingProfileScreen` are callback-driven UI.
+- Both screen composables include paired light/dark Compose previews.
+- `ProfileViewModel` delegates updates to `UserPreferencesRepository`.
 
 ## Dependencies
 
@@ -30,4 +32,3 @@ The feature does not know about DataStore keys or permission-dialog behavior.
 ```
 
 [Back to the module catalog](../../README.md#modules)
-

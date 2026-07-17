@@ -1,0 +1,38 @@
+<resources>
+    <string name="onboarding_welcome">Welcome to Jump</string>
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_profile_title">Choose your training profile.</string>
+    <string name="onboarding_profile_description">Tell us where you are today. Your plan will grow with you.</string>
+    <string name="onboarding_goal_title">What are you training for?</string>
+    <string name="onboarding_goal_description">Choose the outcome that matters most right now.</string>
+    <string name="onboarding_schedule_title">Build a rhythm that lasts.</string>
+    <string name="onboarding_schedule_description">Pick a weekly pace that fits your real life.</string>
+    <string name="onboarding_starting_point">Your starting point</string>
+    <string name="onboarding_focus">Your focus</string>
+    <string name="onboarding_weekly_rhythm">Weekly rhythm</string>
+    <string name="onboarding_sustainable_pace">Start with a pace you can sustain. You can change this any time from Profile.</string>
+    <string name="onboarding_plan_preview">Your starting plan</string>
+    <string name="onboarding_ready_title">Ready to find your rhythm</string>
+    <string name="action_back">Back</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_build_plan">Build my plan</string>
+    <string name="profile_experience">Experience</string>
+    <string name="profile_goal">Goal</string>
+    <string name="profile_frequency">Frequency</string>
+    <string name="experience_beginner">Getting started</string>
+    <string name="experience_beginner_description">Learn the basics with shorter sessions and generous recovery.</string>
+    <string name="experience_regular">Building rhythm</string>
+    <string name="experience_regular_description">Develop consistency with balanced work and recovery.</string>
+    <string name="experience_advanced">Performance focused</string>
+    <string name="experience_advanced_description">Push pace and volume with more demanding sessions.</string>
+    <string name="goal_consistency">Make it a habit</string>
+    <string name="goal_consistency_description">Build a routine you can keep week after week.</string>
+    <string name="goal_endurance">Go for longer</string>
+    <string name="goal_endurance_description">Increase stamina and stay smooth through longer intervals.</string>
+    <string name="goal_speed">Move faster</string>
+    <string name="goal_speed_description">Develop quicker cadence and sharper high-intensity efforts.</string>
+    <plurals name="sessions_per_week">
+        <item quantity="one">%d session/week</item>
+        <item quantity="other">%d sessions/week</item>
+    </plurals>
+</resources>
