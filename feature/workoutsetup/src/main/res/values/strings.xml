@@ -1,0 +1,26 @@
+<resources>
+    <string name="setup_title">Custom intervals</string>
+    <string name="setup_back">Back to today</string>
+    <string name="setup_estimated_workout">Estimated workout</string>
+    <string name="setup_estimated_burn">Estimated burn</string>
+    <string name="setup_calorie_range">~%1$d–%2$d kcal</string>
+    <string name="setup_jump_duration">Jump duration</string>
+    <string name="setup_jump_description">Active time in each round</string>
+    <string name="setup_rest_duration">Rest duration</string>
+    <string name="setup_rest_description">Recovery between rounds</string>
+    <string name="setup_rounds">Rounds</string>
+    <string name="setup_rounds_description">Jump sets in this workout</string>
+    <string name="setup_seconds_value">%1$d sec</string>
+    <string name="setup_rounds_value">%1$d rnd</string>
+    <string name="setup_rest_off">Off</string>
+    <string name="setup_decrease">Decrease %1$s</string>
+    <string name="setup_increase">Increase %1$s</string>
+    <string name="setup_tracking_method">Tracking method</string>
+    <string name="setup_pocket">Pocket</string>
+    <string name="setup_pocket_description">Uses motion sensors while your phone is secured</string>
+    <string name="setup_camera">Camera</string>
+    <string name="setup_camera_description">Counts your movement while you remain in frame</string>
+    <string name="setup_active_title">Workout already running</string>
+    <string name="setup_active_message">Finish or resume your active workout before starting another one.</string>
+    <string name="setup_start">Start custom workout</string>
+</resources>

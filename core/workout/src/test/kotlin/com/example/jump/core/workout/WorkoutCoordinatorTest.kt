@@ -107,4 +107,18 @@ class WorkoutCoordinatorTest {
     assertEquals(1, workouts.savedSessions.size)
     assertEquals(1L, coordinator.state.value.savedSessionId)
   }
+
+  @Test fun correctingSavedJumpsDoesNotAwardRewardsAgain() = runTest {
+    val workouts = FakeWorkoutRepository()
+    val gamification = FakeGamificationRepository()
+    val coordinator = coordinator(workouts, gamification)
+    coordinator.prepare(WorkoutPlan("correction-test", "Correction test", "", WorkoutKind.QUICK), now = 0)
+
+    coordinator.finish()
+    coordinator.correctJumps(25)
+    coordinator.correctJumps(30)
+
+    assertEquals(listOf(1L), gamification.awardedSessionIds)
+    assertEquals(30, coordinator.state.value.correctedJumps)
+  }
 }
