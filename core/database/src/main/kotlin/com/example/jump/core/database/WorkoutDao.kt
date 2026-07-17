@@ -13,6 +13,12 @@ interface WorkoutDao {
   @Query("SELECT * FROM workout_sessions WHERE id = :id")
   suspend fun session(id: Long): WorkoutSessionEntity?
 
+  @Query("SELECT COUNT(*) FROM workout_sessions WHERE status = 'COMPLETED'")
+  suspend fun completedSessionCount(): Int
+
+  @Query("SELECT COALESCE(SUM(correctedJumps), 0) FROM workout_sessions WHERE status = 'COMPLETED'")
+  suspend fun completedCorrectedJumpsTotal(): Int
+
   @Query("SELECT * FROM workout_intervals WHERE sessionId = :sessionId ORDER BY position")
   suspend fun intervals(sessionId: Long): List<WorkoutIntervalEntity>
 

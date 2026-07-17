@@ -1,5 +1,6 @@
 package com.example.jump.core.workout
 
+import com.example.jump.core.domain.AwardWorkoutRewardsUseCase
 import com.example.jump.core.domain.repository.WorkoutRepository
 import com.example.jump.core.model.ActiveWorkoutState
 import com.example.jump.core.model.CountingMode
@@ -13,6 +14,7 @@ import com.example.jump.core.model.WorkoutSession
 import java.util.ArrayDeque
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +22,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 @Singleton
-class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepository) {
+class WorkoutCoordinator @Inject constructor(
+  private val repository: WorkoutRepository,
+  private val awardWorkoutRewards: AwardWorkoutRewardsUseCase,
+) {
   private val mutableState = MutableStateFlow(ActiveWorkoutState())
   val state: StateFlow<ActiveWorkoutState> = mutableState.asStateFlow()
   private val recentJumps = ArrayDeque<Long>()
@@ -127,6 +132,15 @@ class WorkoutCoordinator @Inject constructor(private val repository: WorkoutRepo
       status = status, intervals = plan.intervals,
     ))
     mutableState.value = snapshot.copy(phase = SessionPhase.COMPLETED, savedSessionId = id)
+    if (status == SessionStatus.COMPLETED) {
+      try {
+        awardWorkoutRewards(id)
+      } catch (cancellation: CancellationException) {
+        throw cancellation
+      } catch (_: Exception) {
+        // The workout is already durable. Reward recovery can safely retry by session id.
+      }
+    }
     id
   }
 
