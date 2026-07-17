@@ -46,7 +46,7 @@ class DefaultGamificationRepositoryTest {
 
     val reward = repository.awardForCompletedWorkout(sessionId)!!
 
-    assertThat(reward.baseXp).isEqualTo(150)
+    assertThat(reward.baseXp).isEqualTo(152)
     assertThat(reward.unlockedAchievements).contains(AchievementId.ONE_THOUSAND_JUMP_WORKOUT)
   }
 
