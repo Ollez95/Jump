@@ -1,6 +1,7 @@
 package com.example.jump.core.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -9,117 +10,247 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.jump.core.designsystem.R
 
-private val Ink = Color(0xFF07130E)
-private val Pine = Color(0xFF102019)
-private val DeepMint = Color(0xFF006B4A)
-private val ElectricMint = Color(0xFF65E6A7)
-private val MintMist = Color(0xFFB9F4D3)
-private val Sky = Color(0xFFA8CEFF)
-private val DeepSky = Color(0xFF235F91)
-private val Amber = Color(0xFFFFB95F)
-private val WarmWhite = Color(0xFFF7FAF6)
-private val Paper = Color(0xFFFCFEFB)
-private val SoftSurface = Color(0xFFEAF0EB)
-private val StrongSurface = Color(0xFFDCE7DF)
-
-private val DarkColors = darkColorScheme(
-  primary = ElectricMint,
-  onPrimary = Ink,
-  primaryContainer = Color(0xFF004E35),
-  onPrimaryContainer = Color(0xFFB7F4D1),
-  secondary = Sky,
-  onSecondary = Color(0xFF003351),
-  secondaryContainer = Color(0xFF144B73),
-  onSecondaryContainer = Color(0xFFD2E6FF),
-  tertiary = Amber,
-  onTertiary = Color(0xFF482A00),
-  tertiaryContainer = Color(0xFF654000),
+private val MomentumLightColors = lightColorScheme(
+  primary = Color(0xFF005037),
+  onPrimary = Color(0xFFFFFFFF),
+  primaryContainer = Color(0xFF006B4A),
+  onPrimaryContainer = Color(0xFF92E8BF),
+  inversePrimary = Color(0xFF65E6A7),
+  secondary = Color(0xFF276294),
+  onSecondary = Color(0xFFFFFFFF),
+  secondaryContainer = Color(0xFF91C5FD),
+  onSecondaryContainer = Color(0xFF002F50),
+  tertiary = Color(0xFF643E00),
+  onTertiary = Color(0xFFFFFFFF),
+  tertiaryContainer = Color(0xFF845300),
   onTertiaryContainer = Color(0xFFFFDDB4),
-  background = Ink,
-  onBackground = Color(0xFFE6F0E9),
-  surface = Pine,
-  onSurface = Color(0xFFE6F0E9),
-  surfaceVariant = Color(0xFF384A40),
-  onSurfaceVariant = Color(0xFFBBCBC0),
-  surfaceContainerLowest = Color(0xFF05100B),
-  surfaceContainerLow = Color(0xFF0D1A14),
-  surfaceContainer = Color(0xFF12221A),
-  surfaceContainerHigh = Color(0xFF1A2B22),
-  surfaceContainerHighest = Color(0xFF22342A),
+  background = Color(0xFFEEFDF4),
+  onBackground = Color(0xFF121E19),
+  surface = Color(0xFFEEFDF4),
+  onSurface = Color(0xFF121E19),
+  surfaceVariant = Color(0xFFDDECE3),
+  onSurfaceVariant = Color(0xFF3F4943),
+  surfaceTint = Color(0xFF005037),
+  inverseSurface = Color(0xFF27312B),
+  inverseOnSurface = Color(0xFFECF5EE),
+  surfaceDim = Color(0xFFD7E6DD),
+  surfaceBright = Color(0xFFF5FFF8),
+  surfaceContainerLowest = Color(0xFFFFFFFF),
+  surfaceContainerLow = Color(0xFFE9F7EE),
+  surfaceContainer = Color(0xFFE3F1E8),
+  surfaceContainerHigh = Color(0xFFDDECE3),
+  surfaceContainerHighest = Color(0xFFD7E6DD),
+  outline = Color(0xFF6F7A72),
+  outlineVariant = Color(0xFFBEC9C1),
+  error = Color(0xFFBA1A1A),
+  onError = Color(0xFFFFFFFF),
+  errorContainer = Color(0xFFFFDAD6),
+  onErrorContainer = Color(0xFF410002),
+  scrim = Color(0xFF000000),
+  primaryFixed = Color(0xFF92E8BF),
+  primaryFixedDim = Color(0xFF65E6A7),
+  onPrimaryFixed = Color(0xFF002115),
+  onPrimaryFixedVariant = Color(0xFF005037),
+  secondaryFixed = Color(0xFFD1E5FF),
+  secondaryFixedDim = Color(0xFF9ACBFF),
+  onSecondaryFixed = Color(0xFF001D33),
+  onSecondaryFixedVariant = Color(0xFF154A72),
+  tertiaryFixed = Color(0xFFFFDDB4),
+  tertiaryFixedDim = Color(0xFFFFB95F),
+  onTertiaryFixed = Color(0xFF2B1700),
+  onTertiaryFixedVariant = Color(0xFF643E00),
+)
+
+private val MomentumDarkColors = darkColorScheme(
+  primary = Color(0xFF65E6A7),
+  onPrimary = Color(0xFF003823),
+  primaryContainer = Color(0xFF005037),
+  onPrimaryContainer = Color(0xFF92E8BF),
+  inversePrimary = Color(0xFF005037),
+  secondary = Color(0xFF91C5FD),
+  onSecondary = Color(0xFF003153),
+  secondaryContainer = Color(0xFF174E77),
+  onSecondaryContainer = Color(0xFFCBE5FF),
+  tertiary = Color(0xFFFFB95F),
+  onTertiary = Color(0xFF482A00),
+  tertiaryContainer = Color(0xFF643E00),
+  onTertiaryContainer = Color(0xFFFFDDB4),
+  background = Color(0xFF030A07),
+  onBackground = Color(0xFFDCEBE1),
+  surface = Color(0xFF030A07),
+  onSurface = Color(0xFFDCEBE1),
+  surfaceVariant = Color(0xFF202C25),
+  onSurfaceVariant = Color(0xFFBBC9BF),
+  surfaceTint = Color(0xFF65E6A7),
+  inverseSurface = Color(0xFFDCEBE1),
+  inverseOnSurface = Color(0xFF27312B),
+  surfaceDim = Color(0xFF030A07),
+  surfaceBright = Color(0xFF28362E),
+  surfaceContainerLowest = Color(0xFF010503),
+  surfaceContainerLow = Color(0xFF09130E),
+  surfaceContainer = Color(0xFF0F1A14),
+  surfaceContainerHigh = Color(0xFF17231C),
+  surfaceContainerHighest = Color(0xFF202C25),
   outline = Color(0xFF85968B),
-  outlineVariant = Color(0xFF3C4D43),
+  outlineVariant = Color(0xFF3D4A42),
   error = Color(0xFFFFB4AB),
   onError = Color(0xFF690005),
   errorContainer = Color(0xFF93000A),
   onErrorContainer = Color(0xFFFFDAD6),
+  scrim = Color(0xFF000000),
+  primaryFixed = Color(0xFF92E8BF),
+  primaryFixedDim = Color(0xFF65E6A7),
+  onPrimaryFixed = Color(0xFF002115),
+  onPrimaryFixedVariant = Color(0xFF005037),
+  secondaryFixed = Color(0xFFD1E5FF),
+  secondaryFixedDim = Color(0xFF9ACBFF),
+  onSecondaryFixed = Color(0xFF001D33),
+  onSecondaryFixedVariant = Color(0xFF154A72),
+  tertiaryFixed = Color(0xFFFFDDB4),
+  tertiaryFixedDim = Color(0xFFFFB95F),
+  onTertiaryFixed = Color(0xFF2B1700),
+  onTertiaryFixedVariant = Color(0xFF643E00),
 )
 
-private val LightColors = lightColorScheme(
-  primary = DeepMint,
-  onPrimary = Color.White,
-  primaryContainer = MintMist,
-  onPrimaryContainer = Color(0xFF002115),
-  secondary = DeepSky,
-  onSecondary = Color.White,
-  secondaryContainer = Color(0xFFD1E5FF),
-  onSecondaryContainer = Color(0xFF001D33),
-  tertiary = Color(0xFF865300),
-  onTertiary = Color.White,
-  tertiaryContainer = Color(0xFFFFDDB4),
-  onTertiaryContainer = Color(0xFF2B1700),
-  background = WarmWhite,
-  onBackground = Ink,
-  surface = Paper,
-  onSurface = Ink,
-  surfaceVariant = StrongSurface,
-  onSurfaceVariant = Color(0xFF405048),
-  surfaceContainerLowest = Color.White,
-  surfaceContainerLow = Color(0xFFF0F5F0),
-  surfaceContainer = SoftSurface,
-  surfaceContainerHigh = StrongSurface,
-  surfaceContainerHighest = Color(0xFFD3DED6),
-  outline = Color(0xFF707A73),
-  outlineVariant = Color(0xFFC0CAC2),
-  error = Color(0xFFBA1A1A),
-  onError = Color.White,
-  errorContainer = Color(0xFFFFDAD6),
-  onErrorContainer = Color(0xFF410002),
+val AnybodyFontFamily = FontFamily(
+  Font(R.font.anybody_400, FontWeight.Normal),
+  Font(R.font.anybody_500, FontWeight.Medium),
+  Font(R.font.anybody_600, FontWeight.SemiBold),
+  Font(R.font.anybody_700, FontWeight.Bold),
+  Font(R.font.anybody_800, FontWeight.ExtraBold),
+  Font(R.font.anybody_900, FontWeight.Black),
 )
 
-private val JumpTypography = Typography(
-  displayLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black, fontSize = 56.sp, lineHeight = 58.sp, letterSpacing = (-1.4).sp),
-  displaySmall = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black, fontSize = 40.sp, lineHeight = 43.sp, letterSpacing = (-0.8).sp),
-  headlineLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black, fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.5).sp),
-  headlineMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 33.sp, letterSpacing = (-0.25).sp),
-  headlineSmall = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, fontSize = 23.sp, lineHeight = 29.sp),
-  titleLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 26.sp),
-  titleMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 22.sp, letterSpacing = 0.1.sp),
-  bodyLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp, letterSpacing = 0.15.sp),
-  bodyMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 21.sp, letterSpacing = 0.15.sp),
-  labelLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.25.sp),
-  labelMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 17.sp, letterSpacing = 0.9.sp),
+val LexendFontFamily = FontFamily(
+  Font(R.font.lexend_400, FontWeight.Normal),
+  Font(R.font.lexend_500, FontWeight.Medium),
+  Font(R.font.lexend_600, FontWeight.SemiBold),
+  Font(R.font.lexend_700, FontWeight.Bold),
 )
 
-private val JumpShapes = Shapes(
-  extraSmall = RoundedCornerShape(8.dp),
-  small = RoundedCornerShape(12.dp),
-  medium = RoundedCornerShape(18.dp),
-  large = RoundedCornerShape(24.dp),
-  extraLarge = RoundedCornerShape(32.dp),
+private val MomentumTypography = Typography(
+  displayLarge = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.ExtraBold,
+    fontSize = 56.sp,
+    lineHeight = 64.sp,
+    letterSpacing = (-0.6).sp,
+  ),
+  displayMedium = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.ExtraBold,
+    fontSize = 48.sp,
+    lineHeight = 56.sp,
+    letterSpacing = (-0.5).sp,
+  ),
+  displaySmall = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.ExtraBold,
+    fontSize = 40.sp,
+    lineHeight = 48.sp,
+    letterSpacing = (-0.4).sp,
+  ),
+  headlineLarge = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 32.sp,
+    lineHeight = 40.sp,
+  ),
+  headlineMedium = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 24.sp,
+    lineHeight = 32.sp,
+  ),
+  headlineSmall = TextStyle(
+    fontFamily = AnybodyFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 22.sp,
+    lineHeight = 28.sp,
+  ),
+  titleLarge = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 20.sp,
+    lineHeight = 28.sp,
+  ),
+  titleMedium = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
+  ),
+  titleSmall = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 14.sp,
+    lineHeight = 20.sp,
+  ),
+  bodyLarge = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.Normal,
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
+  ),
+  bodyMedium = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.Normal,
+    fontSize = 14.sp,
+    lineHeight = 20.sp,
+  ),
+  bodySmall = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.Normal,
+    fontSize = 12.sp,
+    lineHeight = 16.sp,
+  ),
+  labelLarge = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 12.sp,
+    lineHeight = 16.sp,
+    letterSpacing = 0.2.sp,
+  ),
+  labelMedium = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 11.sp,
+    lineHeight = 16.sp,
+    letterSpacing = 0.4.sp,
+  ),
+  labelSmall = TextStyle(
+    fontFamily = LexendFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 10.sp,
+    lineHeight = 14.sp,
+    letterSpacing = 0.4.sp,
+  ),
+)
+
+private val MomentumShapes = Shapes(
+  extraSmall = RoundedCornerShape(4.dp),
+  small = RoundedCornerShape(8.dp),
+  medium = RoundedCornerShape(12.dp),
+  large = RoundedCornerShape(16.dp),
+  extraLarge = RoundedCornerShape(24.dp),
 )
 
 @Composable
-fun JumpTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun JumpTheme(
+  darkTheme: Boolean = isSystemInDarkTheme(),
+  content: @Composable () -> Unit,
+) {
   MaterialTheme(
-    colorScheme = if (darkTheme) DarkColors else LightColors,
-    typography = JumpTypography,
-    shapes = JumpShapes,
+    colorScheme = if (darkTheme) MomentumDarkColors else MomentumLightColors,
+    typography = MomentumTypography,
+    shapes = MomentumShapes,
     content = content,
   )
 }

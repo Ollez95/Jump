@@ -1,6 +1,5 @@
 package com.example.jump.core.designsystem.component.button
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -12,19 +11,26 @@ import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 
+/** High-emphasis reward action reserved for XP, streak, quest, and achievement flows. */
 @Composable
-fun JumpPrimaryButton(
+fun JumpMomentumButton(
   label: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
 ) {
+  val colors = MaterialTheme.colorScheme
   Button(
     onClick = onClick,
     modifier = modifier.height(56.dp),
     enabled = enabled,
     shape = MaterialTheme.shapes.medium,
-    contentPadding = ButtonDefaults.ContentPadding,
+    colors = ButtonDefaults.buttonColors(
+      containerColor = colors.tertiaryFixedDim,
+      contentColor = colors.onTertiaryFixed,
+      disabledContainerColor = colors.tertiaryFixedDim.copy(alpha = 0.38f),
+      disabledContentColor = colors.onTertiaryFixed.copy(alpha = 0.38f),
+    ),
   ) {
     Text(label, style = MaterialTheme.typography.labelLarge)
   }
@@ -32,14 +38,9 @@ fun JumpPrimaryButton(
 
 @JumpLightDarkPreviews
 @Composable
-private fun JumpPrimaryButtonPreview() {
+private fun JumpMomentumButtonPreview() {
   JumpComponentPreview {
-    JumpPrimaryButton("Start workout", onClick = {}, modifier = Modifier.fillMaxWidth())
-    JumpPrimaryButton(
-      "Workout in progress",
-      onClick = {},
-      modifier = Modifier.fillMaxWidth(),
-      enabled = false,
-    )
+    JumpMomentumButton(label = "Claim reward", onClick = {})
+    JumpMomentumButton(label = "Reward claimed", onClick = {}, enabled = false)
   }
 }

@@ -26,9 +26,9 @@ fun JumpTopAppBar(
     },
     modifier = modifier,
     colors = TopAppBarDefaults.topAppBarColors(
-      containerColor = MaterialTheme.colorScheme.background,
-      navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-      titleContentColor = MaterialTheme.colorScheme.onBackground,
+      containerColor = MaterialTheme.colorScheme.surface,
+      navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+      titleContentColor = MaterialTheme.colorScheme.onSurface,
     ),
   )
 }

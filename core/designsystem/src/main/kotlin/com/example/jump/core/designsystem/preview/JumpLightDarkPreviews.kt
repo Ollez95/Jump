@@ -8,16 +8,16 @@ import androidx.compose.ui.tooling.preview.Preview
   group = "Theme",
   uiMode = Configuration.UI_MODE_NIGHT_NO,
   showBackground = true,
-  backgroundColor = 0xFFF7FAF6,
-  widthDp = 360,
+  backgroundColor = 0xFFEEFDF4,
+  widthDp = 390,
 )
 @Preview(
   name = "Dark",
   group = "Theme",
   uiMode = Configuration.UI_MODE_NIGHT_YES,
   showBackground = true,
-  backgroundColor = 0xFF07130E,
-  widthDp = 360,
+  backgroundColor = 0xFF030A07,
+  widthDp = 390,
 )
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)

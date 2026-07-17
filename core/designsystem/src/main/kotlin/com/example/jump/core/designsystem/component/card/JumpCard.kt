@@ -9,6 +9,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,12 +22,16 @@ import com.example.jump.core.designsystem.theme.JumpSpacing
 fun JumpCard(
   modifier: Modifier = Modifier,
   containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+  contentColor: Color = contentColorFor(containerColor),
   content: @Composable ColumnScope.() -> Unit,
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
-    shape = MaterialTheme.shapes.medium,
-    colors = CardDefaults.cardColors(containerColor = containerColor),
+    shape = MaterialTheme.shapes.extraLarge,
+    colors = CardDefaults.cardColors(
+      containerColor = containerColor,
+      contentColor = contentColor,
+    ),
     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
   ) {
     Column(

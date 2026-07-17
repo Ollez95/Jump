@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
@@ -40,7 +41,7 @@ fun JumpNavigationBar(
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
-    color = MaterialTheme.colorScheme.background,
+    color = MaterialTheme.colorScheme.surfaceContainer,
     tonalElevation = 0.dp,
     shadowElevation = 0.dp,
   ) {
@@ -54,7 +55,11 @@ fun JumpNavigationBar(
     ) {
       items.forEachIndexed { index, item ->
         val selected = selectedIndex == index
-        val foreground = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+        val foreground = if (selected) {
+          MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+          MaterialTheme.colorScheme.onSurfaceVariant
+        }
         Column(
           Modifier
             .weight(1f)
@@ -63,7 +68,21 @@ fun JumpNavigationBar(
           horizontalAlignment = Alignment.CenterHorizontally,
           verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
-          JumpNavigationGlyph(item.icon, foreground, Modifier.size(21.dp))
+          Surface(
+            shape = CircleShape,
+            color = if (selected) {
+              MaterialTheme.colorScheme.primaryContainer
+            } else {
+              MaterialTheme.colorScheme.surfaceContainer
+            },
+          ) {
+            Box(
+              modifier = Modifier.size(width = 44.dp, height = 28.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              JumpNavigationGlyph(item.icon, foreground, Modifier.size(20.dp))
+            }
+          }
           Text(item.label, style = MaterialTheme.typography.labelMedium, color = foreground)
         }
       }
