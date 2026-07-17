@@ -1,12 +1,14 @@
 package com.example.jump.feature.history
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -23,7 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.jump.core.designsystem.component.button.JumpDestructiveButton
@@ -31,6 +37,7 @@ import com.example.jump.core.designsystem.component.button.JumpPrimaryButton
 import com.example.jump.core.designsystem.component.card.JumpCard
 import com.example.jump.core.designsystem.component.card.JumpStatCard
 import com.example.jump.core.designsystem.component.feedback.JumpEmptyState
+import com.example.jump.core.designsystem.component.feedback.JumpInfoBanner
 import com.example.jump.core.designsystem.component.layout.JumpDetailRow
 import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.component.layout.JumpHeader
@@ -38,9 +45,11 @@ import com.example.jump.core.designsystem.component.layout.JumpScreen
 import com.example.jump.core.designsystem.component.navigation.JumpTopAppBar
 import com.example.jump.core.designsystem.format.formatDate
 import com.example.jump.core.designsystem.format.formatDuration
+import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
+import com.example.jump.core.designsystem.theme.JumpTheme
 import com.example.jump.core.domain.WorkoutCalorieEstimate
 import com.example.jump.core.model.IntervalType
-import com.example.jump.core.model.WorkoutSession
+import com.example.jump.core.model.SessionStatus
 
 @Composable
 fun HistoryRoute(
@@ -48,8 +57,39 @@ fun HistoryRoute(
   onProgress: () -> Unit,
   viewModel: HistoryViewModel = hiltViewModel(),
 ) {
-  val sessions by viewModel.sessions.collectAsStateWithLifecycle()
-  HistoryScreen(sessions, onOpen, onProgress)
+  val state by viewModel.uiState.collectAsStateWithLifecycle()
+  when (val value = state) {
+    HistoryUiState.Loading -> HistoryStatusScreen(
+      title = stringResource(R.string.history_loading_title),
+      message = stringResource(R.string.history_loading_message),
+    )
+    HistoryUiState.Error -> HistoryStatusScreen(
+      title = stringResource(R.string.history_error_title),
+      message = stringResource(R.string.history_error_message),
+      isError = true,
+    )
+    is HistoryUiState.Loaded -> HistoryScreen(value.sessions, onOpen, onProgress)
+  }
+}
+
+@Composable
+private fun HistoryStatusScreen(title: String, message: String, isError: Boolean = false) {
+  JumpScreen {
+    LazyColumn(
+      Modifier.fillMaxSize(),
+      contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+      item {
+        JumpHeader(
+          eyebrow = stringResource(R.string.history_momentum),
+          title = stringResource(R.string.history_title),
+          description = stringResource(R.string.history_description),
+        )
+      }
+      item { JumpInfoBanner(title, message, isError = isError) }
+    }
+  }
 }
 
 @Composable
@@ -66,35 +106,66 @@ fun HistoryScreen(
     ) {
       item {
         JumpHeader(
-          eyebrow = stringResource(R.string.history_activity),
+          eyebrow = stringResource(R.string.history_momentum),
           title = stringResource(R.string.history_title),
           description = stringResource(R.string.history_description),
         )
       }
       item {
+        val summary = historySummary(sessions)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          JumpStatCard(
+            title = stringResource(R.string.history_total_jumps),
+            value = summary.totalJumps.toString(),
+            unit = stringResource(R.string.history_jumps_unit),
+            modifier = Modifier.weight(1f),
+            highlighted = true,
+          )
+          JumpStatCard(
+            title = stringResource(R.string.history_workouts),
+            value = summary.workouts.toString(),
+            unit = stringResource(R.string.history_sessions_unit),
+            modifier = Modifier.weight(1f),
+          )
+        }
+      }
+      item {
         JumpCard {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            ActivityMetric(stringResource(R.string.history_sessions), "${sessions.size}", Modifier.weight(1f))
-            ActivityMetric(
-              stringResource(R.string.history_total_jumps),
-              "${sessions.sumOf { it.session.metrics.correctedJumps }}",
-              Modifier.weight(1f),
-            )
-          }
+          ActivityMetric(
+            label = stringResource(R.string.history_estimated_burn),
+            value = stringResource(
+              R.string.history_calorie_range,
+              historySummary(sessions).minimumCalories,
+              historySummary(sessions).maximumCalories,
+            ),
+          )
+          Text(
+            stringResource(R.string.history_calorie_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
           JumpPrimaryButton(stringResource(R.string.history_insights), onProgress, Modifier.fillMaxWidth())
         }
       }
       if (sessions.isEmpty()) item {
-        JumpEmptyState("Your first session starts here", "Completed workouts will collect here with jumps, pace, time, and streak details.")
+        JumpEmptyState(
+          stringResource(R.string.history_empty_title),
+          stringResource(R.string.history_empty_message),
+        )
       }
       if (sessions.isNotEmpty()) {
         item { JumpEyebrow(stringResource(R.string.history_recent_workouts)) }
       }
       items(sessions, key = { it.session.id }) { item ->
         val session = item.session
-        JumpCard {
+        JumpCard(
+          modifier = Modifier
+            .heightIn(min = 112.dp)
+            .clickable { onOpen(session.id) }
+            .semantics { role = Role.Button },
+        ) {
           Column(
-            Modifier.fillMaxWidth().clickable { onOpen(session.id) },
+            Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
           ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -109,7 +180,11 @@ fun HistoryScreen(
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
               Text(formatDuration(session.durationMillis), style = MaterialTheme.typography.labelLarge)
-              Text("${session.metrics.averagePace} avg jpm", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+              Text(
+                stringResource(R.string.history_average_pace, session.metrics.averagePace),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
             }
           }
         }
@@ -125,6 +200,20 @@ private fun ActivityMetric(label: String, value: String, modifier: Modifier = Mo
     Text(value, style = MaterialTheme.typography.headlineSmall)
   }
 }
+
+internal data class HistorySummary(
+  val workouts: Int,
+  val totalJumps: Int,
+  val minimumCalories: Int,
+  val maximumCalories: Int,
+)
+
+internal fun historySummary(sessions: List<HistorySessionUiModel>): HistorySummary = HistorySummary(
+  workouts = sessions.size,
+  totalJumps = sessions.sumOf { it.session.metrics.correctedJumps },
+  minimumCalories = sessions.sumOf { it.calorieEstimate.minimumCalories },
+  maximumCalories = sessions.sumOf { it.calorieEstimate.maximumCalories },
+)
 
 @Composable
 fun SessionDetailRoute(sessionId: Long, onBack: () -> Unit, viewModel: SessionDetailViewModel = hiltViewModel()) {
@@ -144,9 +233,9 @@ fun SessionDetailScreen(
   JumpScreen(
     topBar = {
       JumpTopAppBar(
-        title = "Session details",
+        title = stringResource(R.string.session_details_title),
         onBack = onBack,
-        backContentDescription = "Back to history",
+        backContentDescription = stringResource(R.string.session_back),
       )
     },
   ) {
@@ -155,42 +244,59 @@ fun SessionDetailScreen(
       contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      if (session == null) item { JumpEmptyState("Loading workout…", "Your session details are on the way.") } else {
+      if (state.status != SessionDetailStatus.LOADED || session == null) item {
+        when (state.status) {
+          SessionDetailStatus.LOADING -> JumpInfoBanner(
+            stringResource(R.string.session_loading_title),
+            stringResource(R.string.session_loading_message),
+          )
+          SessionDetailStatus.NOT_FOUND -> JumpEmptyState(
+            stringResource(R.string.session_not_found_title),
+            stringResource(R.string.session_not_found_message),
+          )
+          SessionDetailStatus.ERROR -> JumpInfoBanner(
+            stringResource(R.string.session_error_title),
+            stringResource(R.string.session_error_message),
+            isError = true,
+          )
+          SessionDetailStatus.LOADED -> Unit
+        }
+      } else {
         item {
           JumpHeader(
-            eyebrow = "Session recap",
+            eyebrow = stringResource(R.string.session_recap),
             title = session.title,
             description = formatDate(session.startedAtEpochMillis),
           )
         }
         item {
           Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Total", "${session.metrics.correctedJumps}", "jumps", Modifier.weight(1f), highlighted = true)
-            JumpStatCard("Best pace", "${session.metrics.bestPace}", "jpm", Modifier.weight(1f))
+            JumpStatCard(stringResource(R.string.session_total), "${session.metrics.correctedJumps}", stringResource(R.string.history_jumps_unit), Modifier.weight(1f), highlighted = true)
+            JumpStatCard(stringResource(R.string.session_best_pace), "${session.metrics.bestPace}", stringResource(R.string.session_jpm), Modifier.weight(1f))
           }
         }
         item {
           JumpCard {
-            Text("Workout details", style = MaterialTheme.typography.titleLarge)
-            JumpDetailRow("Detected", "${session.metrics.detectedJumps}")
-            JumpDetailRow("Elapsed time", formatDuration(session.durationMillis))
-            JumpDetailRow("Active time", formatDuration(session.activeMillis))
+            Text(stringResource(R.string.session_workout_details), style = MaterialTheme.typography.titleLarge)
+            JumpDetailRow(stringResource(R.string.session_detected), "${session.metrics.detectedJumps}")
+            JumpDetailRow(stringResource(R.string.session_elapsed_time), formatDuration(session.durationMillis))
+            JumpDetailRow(stringResource(R.string.session_active_time), formatDuration(session.activeMillis))
             JumpDetailRow(
-              "Estimated calories (${state.calorieEstimate.referenceWeightKg} kg)",
-              state.calorieEstimate.asCalories(),
+              stringResource(R.string.session_estimated_calories, state.calorieEstimate.referenceWeightKg),
+              calorieRange(state.calorieEstimate),
             )
-            JumpDetailRow("Average pace", "${session.metrics.averagePace} jpm")
-            JumpDetailRow("Longest streak", "${session.metrics.longestStreak}")
-            JumpDetailRow("Status", session.status.name.lowercase().replaceFirstChar { it.uppercase() })
+            JumpDetailRow(stringResource(R.string.session_average_pace), stringResource(R.string.session_pace_value, session.metrics.averagePace))
+            JumpDetailRow(stringResource(R.string.session_longest_streak), "${session.metrics.longestStreak}")
+            JumpDetailRow(stringResource(R.string.session_status), sessionStatusLabel(session.status))
             if (session.intervals.isNotEmpty()) {
               val work = session.intervals.firstOrNull { it.type == IntervalType.WORK }
               val rest = session.intervals.firstOrNull { it.type == IntervalType.REST }
-              JumpDetailRow("Rounds", "${session.intervals.count { it.type == IntervalType.WORK }}")
-              JumpDetailRow("Jump time", work?.let { "${it.durationSeconds}s" }.orEmpty())
-              JumpDetailRow("Rest time", rest?.let { "${it.durationSeconds}s" } ?: "Off")
+              JumpDetailRow(stringResource(R.string.session_rounds), "${session.intervals.count { it.type == IntervalType.WORK }}")
+              JumpDetailRow(stringResource(R.string.session_jump_time), work?.let { stringResource(R.string.session_seconds, it.durationSeconds) }.orEmpty())
+              JumpDetailRow(stringResource(R.string.session_rest_time), rest?.let { stringResource(R.string.session_seconds, it.durationSeconds) } ?: stringResource(R.string.session_off))
             }
             Text(
-              "Calories are estimated from active jump time at a slow-to-fast pace. Actual burn varies by body weight, pace, technique, and fitness.",
+              stringResource(R.string.session_calorie_disclaimer),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -198,7 +304,7 @@ fun SessionDetailScreen(
         }
         item {
           JumpDestructiveButton(
-            label = "Delete session",
+            label = stringResource(R.string.session_delete),
             onClick = { showDeleteConfirmation = true },
             modifier = Modifier.fillMaxWidth(),
           )
@@ -226,20 +332,41 @@ private fun DeleteSessionDialog(
 ) {
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Delete session?") },
-    text = { Text("$sessionTitle and its workout data will be permanently removed.") },
+    title = { Text(stringResource(R.string.session_delete_title)) },
+    text = { Text(stringResource(R.string.session_delete_message, sessionTitle)) },
     confirmButton = {
       TextButton(
         onClick = onConfirm,
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
       ) {
-        Text("Delete")
+        Text(stringResource(R.string.session_delete_confirm))
       }
     },
     dismissButton = {
-      TextButton(onClick = onDismiss) { Text("Keep session") }
+      TextButton(onClick = onDismiss) { Text(stringResource(R.string.session_delete_keep)) }
     },
   )
 }
 
-private fun WorkoutCalorieEstimate.asCalories(): String = "~$minimumCalories–$maximumCalories kcal"
+@Composable
+private fun calorieRange(estimate: WorkoutCalorieEstimate): String = stringResource(
+  R.string.session_calorie_range,
+  estimate.minimumCalories,
+  estimate.maximumCalories,
+)
+
+@Composable
+private fun sessionStatusLabel(status: SessionStatus): String = stringResource(
+  when (status) {
+    SessionStatus.COMPLETED -> R.string.session_status_completed
+    SessionStatus.CANCELLED -> R.string.session_status_cancelled
+    SessionStatus.INTERRUPTED -> R.string.session_status_interrupted
+  },
+)
+
+@JumpLightDarkPreviews
+@Preview(name = "1.5x font", widthDp = 390, heightDp = 884, fontScale = 1.5f, showBackground = true)
+@Composable
+private fun HistoryScreenPreview() {
+  JumpTheme { HistoryScreen(sessions = emptyList(), onOpen = {}, onProgress = {}) }
+}

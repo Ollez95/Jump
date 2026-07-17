@@ -1,5 +1,8 @@
 <resources>
     <string name="progress_eyebrow">Insights</string>
+    <string name="progress_title">Progress</string>
+    <string name="progress_back">Back to activity</string>
+    <string name="progress_your_progress">Your progress</string>
     <string name="progress_description">Patterns from your completed workouts.</string>
     <string name="progress_overview">Overview</string>
     <string name="progress_current_streak">Current streak</string>
@@ -11,4 +14,59 @@
     <string name="progress_days">%1$d days</string>
     <string name="progress_calories">%1$d–%2$d kcal</string>
     <string name="progress_calorie_disclaimer">Calories are estimated for %1$d kg from recorded active jump time at a slow-to-fast pace. Actual burn varies by body weight, pace, technique, and fitness.</string>
+    <string name="progress_loading_title">Building your insights</string>
+    <string name="progress_loading_message">Your training history is being analyzed.</string>
+    <string name="progress_error_title">Insights are unavailable</string>
+    <string name="progress_error_message">Your workouts and rewards are still safe. Try opening Progress again.</string>
+    <string name="progress_empty_title">No training activity yet</string>
+    <string name="progress_empty_message">Complete a jump session and your calendar, quests, and charts will begin to fill in.</string>
+    <string name="progress_momentum">Momentum</string>
+    <string name="progress_level">Level %1$d</string>
+    <string name="progress_day_streak">day streak</string>
+    <string name="progress_next_level">Next level</string>
+    <string name="progress_xp_value">%1$d / %2$d XP</string>
+    <string name="progress_total">total</string>
+    <string name="progress_workouts">workouts</string>
+    <string name="progress_quest_history">Quest history</string>
+    <string name="progress_quest_value">%1$d / %2$d</string>
+    <string name="progress_quest_complete">Complete</string>
+    <string name="progress_quest_active">In progress</string>
+    <string name="quest_daily_workout">Daily rhythm</string>
+    <string name="quest_daily_workout_description">Complete one workout today.</string>
+    <string name="quest_daily_jumps">Daily jumps</string>
+    <string name="quest_daily_jumps_description">Build momentum with 500 jumps today.</string>
+    <string name="quest_weekly_workouts">Weekly consistency</string>
+    <string name="quest_weekly_workouts_description">Complete three workouts this week.</string>
+    <string name="quest_weekly_jumps">Weekly volume</string>
+    <string name="quest_weekly_jumps_description">Reach 3,000 jumps this week.</string>
+    <string name="progress_achievements">Achievements</string>
+    <string name="progress_achievements_summary">%1$d of %2$d unlocked</string>
+    <string name="progress_unlocked">Unlocked %1$s</string>
+    <string name="progress_locked">Locked</string>
+    <string name="achievement_first_workout">First rhythm</string>
+    <string name="achievement_thousand_jumps">1,000 total jumps</string>
+    <string name="achievement_three_day_streak">Three-day streak</string>
+    <string name="achievement_thousand_workout">1,000-jump workout</string>
+    <string name="achievement_ten_workouts">Ten workouts</string>
+    <string name="progress_training_calendar">Training calendar</string>
+    <string name="progress_last_weeks">Last 13 weeks</string>
+    <string name="progress_days_period">Days in this period</string>
+    <string name="progress_weekly_activity">Weekly activity</string>
+    <string name="progress_weekly_activity_description">Active jump time across the last 8 weeks</string>
+    <string name="progress_future_date">%1$s, future date</string>
+    <string name="progress_trained_date">%1$s, %2$d sessions, %3$d active minutes</string>
+    <string name="progress_no_training_date">%1$s, no training</string>
+    <string name="progress_less">Less</string>
+    <string name="progress_more">More</string>
+    <string name="progress_minutes">%1$dm</string>
+    <string name="progress_hours_minutes">%1$dh %2$dm</string>
+    <string-array name="progress_weekday_labels">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
 </resources>

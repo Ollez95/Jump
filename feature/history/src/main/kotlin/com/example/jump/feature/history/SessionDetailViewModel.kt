@@ -10,6 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 @HiltViewModel
 class SessionDetailViewModel @Inject constructor(
@@ -21,11 +22,23 @@ class SessionDetailViewModel @Inject constructor(
 
   fun load(id: Long) {
     viewModelScope.launch {
-      val session = workouts.session(id)
-      mutableState.value = SessionDetailUiState(
-        session = session,
-        calorieEstimate = session?.let(calorieEstimator::estimate) ?: WorkoutCalorieEstimate(),
-      )
+      mutableState.value = SessionDetailUiState(status = SessionDetailStatus.LOADING)
+      mutableState.value = try {
+        val session = workouts.session(id)
+        if (session == null) {
+          SessionDetailUiState(status = SessionDetailStatus.NOT_FOUND)
+        } else {
+          SessionDetailUiState(
+            status = SessionDetailStatus.LOADED,
+            session = session,
+            calorieEstimate = calorieEstimator.estimate(session),
+          )
+        }
+      } catch (cancellation: CancellationException) {
+        throw cancellation
+      } catch (_: Exception) {
+        SessionDetailUiState(status = SessionDetailStatus.ERROR)
+      }
     }
   }
 
