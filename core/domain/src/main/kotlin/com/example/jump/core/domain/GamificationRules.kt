@@ -3,10 +3,10 @@ package com.example.jump.core.domain
 import com.example.jump.core.model.AchievementId
 import com.example.jump.core.model.QuestCadence
 import com.example.jump.core.model.QuestId
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.WeekFields
 import java.util.Locale
-import java.util.TimeZone
 import kotlin.math.max
 
 object GamificationRules {
@@ -118,24 +118,19 @@ object GamificationRules {
   data class PeriodKeys(val daily: String, val weekly: String, val localDay: Long) {
     companion object {
       fun from(epochMillis: Long, timeZoneId: String): PeriodKeys {
-        val local = GregorianCalendar(TimeZone.getTimeZone(timeZoneId)).apply {
-          timeInMillis = epochMillis
-          firstDayOfWeek = Calendar.MONDAY
-          minimalDaysInFirstWeek = 4
-        }
-        val year = local.get(Calendar.YEAR)
-        val month = local.get(Calendar.MONTH) + 1
-        val day = local.get(Calendar.DAY_OF_MONTH)
-        val weekYear = local.weekYear
-        val week = local.get(Calendar.WEEK_OF_YEAR)
-        val neutral = GregorianCalendar(TimeZone.getTimeZone("UTC")).apply {
-          clear()
-          set(year, month - 1, day)
-        }
+        val localDate = Instant.ofEpochMilli(epochMillis)
+          .atZone(ZoneId.of(timeZoneId))
+          .toLocalDate()
+        val isoWeek = WeekFields.ISO
         return PeriodKeys(
-          daily = String.format(Locale.ROOT, "%04d-%02d-%02d", year, month, day),
-          weekly = String.format(Locale.ROOT, "%04d-W%02d", weekYear, week),
-          localDay = neutral.timeInMillis / 86_400_000L,
+          daily = localDate.toString(),
+          weekly = String.format(
+            Locale.ROOT,
+            "%04d-W%02d",
+            localDate.get(isoWeek.weekBasedYear()),
+            localDate.get(isoWeek.weekOfWeekBasedYear()),
+          ),
+          localDay = localDate.toEpochDay(),
         )
       }
     }
