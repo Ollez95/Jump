@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.layout
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

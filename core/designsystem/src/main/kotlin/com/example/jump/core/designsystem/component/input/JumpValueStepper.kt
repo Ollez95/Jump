@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.input
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

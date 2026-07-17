@@ -18,9 +18,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.jump.core.designsystem.component.JumpNavigationBar
-import com.example.jump.core.designsystem.component.JumpNavigationIcon
-import com.example.jump.core.designsystem.component.JumpNavigationItem
+import com.example.jump.core.designsystem.component.navigation.JumpNavigationBar
+import com.example.jump.core.designsystem.component.navigation.JumpNavigationIcon
+import com.example.jump.core.designsystem.component.navigation.JumpNavigationItem
 import com.example.jump.core.model.WorkoutPlan
 import com.example.jump.core.model.CountingMode
 import com.example.jump.feature.history.HistoryRoute

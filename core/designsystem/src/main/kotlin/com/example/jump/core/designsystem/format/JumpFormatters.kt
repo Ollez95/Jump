@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.format
 
 import java.text.SimpleDateFormat
 import java.util.Date

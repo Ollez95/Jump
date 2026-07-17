@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.button
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

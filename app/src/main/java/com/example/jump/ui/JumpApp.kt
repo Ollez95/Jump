@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.jump.MainNavigation
-import com.example.jump.core.designsystem.component.JumpBrandMark
-import com.example.jump.core.designsystem.component.JumpScreen
+import com.example.jump.core.designsystem.component.branding.JumpBrandMark
+import com.example.jump.core.designsystem.component.layout.JumpScreen
 import com.example.jump.feature.onboarding.OnboardingRoute
 
 @Composable

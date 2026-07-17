@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.navigation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -7,6 +7,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.jump.core.designsystem.component.button.JumpBackButton
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 

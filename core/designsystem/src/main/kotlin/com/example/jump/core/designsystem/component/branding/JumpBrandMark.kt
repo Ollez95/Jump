@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.branding
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.indicator
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.feedback
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -6,6 +6,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.jump.core.designsystem.component.branding.JumpBrandMark
+import com.example.jump.core.designsystem.component.card.JumpCard
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 

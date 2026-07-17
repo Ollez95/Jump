@@ -1,4 +1,4 @@
-package com.example.jump.core.designsystem.component
+package com.example.jump.core.designsystem.component.layout
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.jump.core.designsystem.component.branding.JumpBrandMark
 import com.example.jump.core.designsystem.preview.JumpComponentPreview
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
 import com.example.jump.core.designsystem.theme.JumpSpacing
