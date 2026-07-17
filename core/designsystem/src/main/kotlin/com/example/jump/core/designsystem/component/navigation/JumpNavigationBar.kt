@@ -55,8 +55,13 @@ fun JumpNavigationBar(
     ) {
       items.forEachIndexed { index, item ->
         val selected = selectedIndex == index
-        val foreground = if (selected) {
+        val indicatorContentColor = if (selected) {
           MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+          MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        val labelColor = if (selected) {
+          MaterialTheme.colorScheme.primary
         } else {
           MaterialTheme.colorScheme.onSurfaceVariant
         }
@@ -80,10 +85,10 @@ fun JumpNavigationBar(
               modifier = Modifier.size(width = 44.dp, height = 28.dp),
               contentAlignment = Alignment.Center,
             ) {
-              JumpNavigationGlyph(item.icon, foreground, Modifier.size(20.dp))
+              JumpNavigationGlyph(item.icon, indicatorContentColor, Modifier.size(20.dp))
             }
           }
-          Text(item.label, style = MaterialTheme.typography.labelMedium, color = foreground)
+          Text(item.label, style = MaterialTheme.typography.labelMedium, color = labelColor)
         }
       }
     }

@@ -25,9 +25,10 @@ fun JumpSecondaryButton(
     modifier = modifier.height(56.dp),
     enabled = enabled,
     shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
     colors = ButtonDefaults.outlinedButtonColors(
-      contentColor = MaterialTheme.colorScheme.primary,
+      contentColor = MaterialTheme.colorScheme.secondary,
+      disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f),
     ),
   ) {
     Text(label, style = MaterialTheme.typography.labelLarge)
