@@ -2,6 +2,10 @@ package com.example.jump.core.data.di
 
 import com.example.jump.core.data.repository.DefaultUserPreferencesRepository
 import com.example.jump.core.data.repository.DefaultWorkoutRepository
+import com.example.jump.core.data.repository.DefaultGamificationRepository
+import com.example.jump.core.data.repository.SystemGamificationTimeProvider
+import com.example.jump.core.domain.GamificationTimeProvider
+import com.example.jump.core.domain.repository.GamificationRepository
 import com.example.jump.core.domain.repository.UserPreferencesRepository
 import com.example.jump.core.domain.repository.WorkoutRepository
 import dagger.Binds
@@ -15,4 +19,6 @@ import javax.inject.Singleton
 abstract class DataModule {
   @Binds @Singleton abstract fun bindsUserPreferencesRepository(impl: DefaultUserPreferencesRepository): UserPreferencesRepository
   @Binds @Singleton abstract fun bindsWorkoutRepository(impl: DefaultWorkoutRepository): WorkoutRepository
+  @Binds @Singleton abstract fun bindsGamificationRepository(impl: DefaultGamificationRepository): GamificationRepository
+  @Binds @Singleton abstract fun bindsGamificationTimeProvider(impl: SystemGamificationTimeProvider): GamificationTimeProvider
 }

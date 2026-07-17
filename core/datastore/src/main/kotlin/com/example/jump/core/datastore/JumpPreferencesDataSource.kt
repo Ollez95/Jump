@@ -34,6 +34,10 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
     )
   }
 
+  val welcomeComplete: Flow<Boolean> = safeData.map { values ->
+    values[JumpPreferencesKeys.welcomeComplete] ?: false
+  }
+
   val cues: Flow<CuePreferences> = safeData.map { values ->
     CuePreferences(
       values[JumpPreferencesKeys.voice] ?: true,
@@ -63,6 +67,10 @@ class JumpPreferencesDataSource @Inject constructor(@ApplicationContext context:
       values[JumpPreferencesKeys.goal] = profile.trainingGoal.name
       values[JumpPreferencesKeys.frequency] = profile.sessionsPerWeek.coerceIn(2, 6)
     }
+  }
+
+  suspend fun setWelcomeComplete() {
+    dataStore.edit { values -> values[JumpPreferencesKeys.welcomeComplete] = true }
   }
 
   suspend fun setCues(cues: CuePreferences) {

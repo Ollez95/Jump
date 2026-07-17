@@ -14,12 +14,17 @@ class DefaultUserPreferencesRepository @Inject constructor(
   private val dataSource: JumpPreferencesDataSource,
 ) : UserPreferencesRepository {
   override val profile = dataSource.profile
+  override val welcomeComplete = dataSource.welcomeComplete
   override val cues = dataSource.cues
   override val countingMode = dataSource.countingMode
   override val intervalWorkoutConfig = dataSource.intervalWorkoutConfig
 
   override suspend fun saveProfile(profile: UserProfile) {
     dataSource.saveProfile(profile)
+  }
+
+  override suspend fun setWelcomeComplete() {
+    dataSource.setWelcomeComplete()
   }
 
   override suspend fun setCuePreferences(cues: CuePreferences) {

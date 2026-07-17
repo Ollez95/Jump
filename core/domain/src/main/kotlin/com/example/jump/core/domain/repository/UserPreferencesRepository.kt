@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserPreferencesRepository {
   val profile: Flow<UserProfile>
+  val welcomeComplete: Flow<Boolean>
   val cues: Flow<CuePreferences>
   val countingMode: Flow<CountingMode>
   val intervalWorkoutConfig: Flow<IntervalWorkoutConfig>
 
   suspend fun saveProfile(profile: UserProfile)
+  suspend fun setWelcomeComplete()
   suspend fun setCuePreferences(cues: CuePreferences)
   suspend fun setCountingMode(mode: CountingMode)
   suspend fun setIntervalWorkoutConfig(configuration: IntervalWorkoutConfig)

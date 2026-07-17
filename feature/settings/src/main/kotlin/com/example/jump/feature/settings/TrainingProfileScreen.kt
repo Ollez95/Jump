@@ -2,7 +2,6 @@ package com.example.jump.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.jump.core.designsystem.component.button.JumpPrimaryButton
 import com.example.jump.core.designsystem.component.card.JumpCard
 import com.example.jump.core.designsystem.component.card.JumpChoiceCard
-import com.example.jump.core.designsystem.component.input.JumpNumberChip
 import com.example.jump.core.designsystem.component.layout.JumpDetailRow
 import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.component.layout.JumpHeader
@@ -99,23 +98,18 @@ fun TrainingProfileScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
-          Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-          ) {
-            (2..6).forEach { count ->
-              JumpNumberChip(
-                value = count,
-                selected = frequency == count,
-                onClick = { onFrequencySelected(count) },
-                modifier = Modifier.weight(1f),
-              )
-            }
+          (2..6).forEach { count ->
+            JumpChoiceCard(
+              label = pluralStringResource(R.plurals.sessions_per_week, count, count),
+              description = frequencyDescription(count),
+              selected = frequency == count,
+              onClick = { onFrequencySelected(count) },
+            )
           }
         }
       }
       item {
-        JumpCard(containerColor = MaterialTheme.colorScheme.primaryContainer) {
+        JumpCard {
           JumpEyebrow(stringResource(R.string.updated_plan))
           JumpDetailRow(stringResource(R.string.experience_label), experienceLabel(level))
           JumpDetailRow(stringResource(R.string.goal_label), goalLabel(goal))
@@ -145,7 +139,19 @@ fun TrainingProfileScreen(
   }
 }
 
+@Composable
+private fun frequencyDescription(frequency: Int): String = stringResource(
+  when (frequency) {
+    2 -> R.string.frequency_two_description
+    3 -> R.string.frequency_three_description
+    4 -> R.string.frequency_four_description
+    5 -> R.string.frequency_five_description
+    else -> R.string.frequency_six_description
+  },
+)
+
 @JumpLightDarkPreviews
+@Preview(name = "1.5x font", widthDp = 390, heightDp = 884, fontScale = 1.5f, showBackground = true)
 @Composable
 private fun TrainingProfileScreenPreview() {
   val profile = UserProfile(

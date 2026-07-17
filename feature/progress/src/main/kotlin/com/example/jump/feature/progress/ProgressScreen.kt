@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,11 +22,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.jump.core.designsystem.component.card.JumpCard
@@ -35,8 +40,18 @@ import com.example.jump.core.designsystem.component.layout.JumpDetailRow
 import com.example.jump.core.designsystem.component.layout.JumpHeader
 import com.example.jump.core.designsystem.component.layout.JumpScreen
 import com.example.jump.core.designsystem.component.navigation.JumpTopAppBar
+import com.example.jump.core.designsystem.component.reward.JumpQuestCard
+import com.example.jump.core.designsystem.component.reward.JumpQuestState
+import com.example.jump.core.designsystem.component.reward.JumpStreakBadge
+import com.example.jump.core.designsystem.component.reward.JumpXpProgress
+import com.example.jump.core.designsystem.component.layout.JumpEyebrow
+import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
+import com.example.jump.core.designsystem.theme.JumpTheme
 import com.example.jump.core.domain.TrainingDay
 import com.example.jump.core.domain.TrainingWeek
+import com.example.jump.core.model.AchievementId
+import com.example.jump.core.model.QuestId
+import com.example.jump.core.model.QuestProgress
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,12 +68,13 @@ fun ProgressRoute(
 @Composable
 fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
   val report = state.report
+  val locale = LocalConfiguration.current.locales[0]
   JumpScreen(
     topBar = {
       JumpTopAppBar(
-        title = "Progress",
+        title = stringResource(R.string.progress_title),
         onBack = onBack,
-        backContentDescription = "Back to history",
+        backContentDescription = stringResource(R.string.progress_back),
       )
     },
   ) {
@@ -69,60 +85,147 @@ fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
     ) {
       item {
         JumpHeader(
-          eyebrow = "Training insights",
-          title = "Your progress",
-          description = "See the rhythm you are building, one training day at a time.",
-          brandMark = true,
+          eyebrow = stringResource(R.string.progress_eyebrow),
+          title = stringResource(R.string.progress_your_progress),
+          description = stringResource(R.string.progress_description),
         )
       }
       if (report == null) {
-        item { JumpInfoBanner("Building your insights", "Your training history is being analyzed.") }
+        item {
+          JumpInfoBanner(
+            if (state.loadFailed) stringResource(R.string.progress_error_title)
+            else stringResource(R.string.progress_loading_title),
+            if (state.loadFailed) stringResource(R.string.progress_error_message)
+            else stringResource(R.string.progress_loading_message),
+            isError = state.loadFailed,
+          )
+        }
       } else {
         if (report.totalSessions == 0) {
-          item { JumpInfoBanner("No training activity yet", "Complete a jump session and your calendar and charts will begin to fill in.") }
+          item {
+            JumpInfoBanner(
+              stringResource(R.string.progress_empty_title),
+              stringResource(R.string.progress_empty_message),
+            )
+          }
         }
-        item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Current streak", "${report.currentStreakDays}", "days", Modifier.weight(1f), highlighted = report.currentStreakDays > 0)
-            JumpStatCard("Longest streak", "${report.longestStreakDays}", "days", Modifier.weight(1f))
+        state.rewards?.let { rewards ->
+          item {
+            JumpCard {
+              Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                  JumpEyebrow(stringResource(R.string.progress_momentum))
+                  Text(
+                    stringResource(R.string.progress_level, rewards.level),
+                    style = MaterialTheme.typography.headlineMedium,
+                  )
+                }
+                JumpStreakBadge(
+                  value = rewards.currentStreak.toString(),
+                  label = stringResource(R.string.progress_day_streak),
+                )
+              }
+              JumpXpProgress(
+                label = stringResource(R.string.progress_next_level),
+                value = stringResource(
+                  R.string.progress_xp_value,
+                  rewards.xpInLevel,
+                  rewards.xpToNextLevel,
+                ),
+                progress = rewards.xpInLevel.toFloat() / rewards.xpToNextLevel.coerceAtLeast(1),
+              )
+            }
           }
         }
         item {
-          JumpCard {
-            Text("Training calendar", style = MaterialTheme.typography.titleLarge)
-            Text("Last 13 weeks", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            TrainingCalendar(report.calendarDays)
-            ActivityLegend()
-            JumpDetailRow("Days in this period", "${report.calendarDays.count { it.trained }}")
-          }
-        }
-        item {
-          JumpCard {
-            Text("Weekly activity", style = MaterialTheme.typography.titleLarge)
-            Text("Active jump time across the last 8 weeks", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            WeeklyActivityChart(report.weeklyActivity)
-          }
-        }
-        item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Sessions", "${report.totalSessions}", "all time", Modifier.weight(1f), highlighted = report.totalSessions > 0)
-            JumpStatCard("Jumps", "${report.totalJumps}", "all time", Modifier.weight(1f))
-          }
-        }
-        item {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            JumpStatCard("Active time", formatActiveTime(report.totalActiveMillis), "all time", Modifier.weight(1f))
+          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             JumpStatCard(
-              "Calories",
-              "${report.calorieEstimate.minimumCalories}–${report.calorieEstimate.maximumCalories}",
-              "kcal · ${report.calorieEstimate.referenceWeightKg} kg",
+              stringResource(R.string.progress_jumps),
+              report.totalJumps.toString(),
+              stringResource(R.string.progress_total),
+              Modifier.weight(1f),
+              highlighted = true,
+            )
+            JumpStatCard(
+              stringResource(R.string.progress_sessions),
+              report.totalSessions.toString(),
+              stringResource(R.string.progress_workouts),
               Modifier.weight(1f),
             )
           }
         }
         item {
+          JumpCard {
+            Text(stringResource(R.string.progress_overview), style = MaterialTheme.typography.titleLarge)
+            JumpDetailRow(stringResource(R.string.progress_current_streak), stringResource(R.string.progress_days, report.currentStreakDays))
+            JumpDetailRow(stringResource(R.string.progress_longest_streak), stringResource(R.string.progress_days, report.longestStreakDays))
+            JumpDetailRow(stringResource(R.string.progress_active_time), formatActiveTime(report.totalActiveMillis))
+            JumpDetailRow(
+              stringResource(R.string.progress_estimated_calories),
+              stringResource(R.string.progress_calories, report.calorieEstimate.minimumCalories, report.calorieEstimate.maximumCalories),
+            )
+          }
+        }
+        state.rewards?.let { rewards ->
+          item { JumpEyebrow(stringResource(R.string.progress_quest_history)) }
+          items(rewards.dailyQuests + rewards.weeklyQuests, key = { it.id.name }) { quest ->
+            QuestProgressCard(quest)
+          }
+          item {
+            JumpCard {
+              Text(stringResource(R.string.progress_achievements), style = MaterialTheme.typography.titleLarge)
+              Text(
+                stringResource(
+                  R.string.progress_achievements_summary,
+                  rewards.achievements.size,
+                  AchievementId.entries.size,
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              AchievementId.entries.forEach { achievement ->
+                val unlock = rewards.achievements.firstOrNull { it.id == achievement }
+                Column(
+                  Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                  verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                  Text(achievementLabel(achievement), style = MaterialTheme.typography.titleMedium)
+                  Text(
+                    unlock?.let {
+                    stringResource(R.string.progress_unlocked, formatAchievementDate(it.unlockedAtEpochMillis, locale))
+                    } ?: stringResource(R.string.progress_locked),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (unlock == null) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.primary,
+                  )
+                }
+              }
+            }
+          }
+        }
+        item {
+          JumpCard {
+            Text(stringResource(R.string.progress_training_calendar), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.progress_last_weeks), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TrainingCalendar(report.calendarDays)
+            ActivityLegend()
+            JumpDetailRow(stringResource(R.string.progress_days_period), "${report.calendarDays.count { it.trained }}")
+          }
+        }
+        item {
+          JumpCard {
+            Text(stringResource(R.string.progress_weekly_activity), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.progress_weekly_activity_description), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            WeeklyActivityChart(report.weeklyActivity)
+          }
+        }
+        item {
           Text(
-            "Calories are estimated from recorded active jump time at a slow-to-fast pace. Actual burn varies by body weight, pace, technique, and fitness.",
+            stringResource(R.string.progress_calorie_disclaimer, report.calorieEstimate.referenceWeightKg),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -133,9 +236,63 @@ fun ProgressScreen(state: ProgressUiState, onBack: () -> Unit) {
 }
 
 @Composable
+private fun QuestProgressCard(quest: QuestProgress) {
+  JumpQuestCard(
+    title = questLabel(quest.id),
+    description = questDescription(quest.id),
+    progressText = stringResource(
+      R.string.progress_quest_value,
+      quest.progress.coerceAtMost(quest.id.target),
+      quest.id.target,
+    ),
+    statusText = if (quest.completed) {
+      stringResource(R.string.progress_quest_complete)
+    } else {
+      stringResource(R.string.progress_quest_active)
+    },
+    progress = quest.progress.toFloat() / quest.id.target.coerceAtLeast(1),
+    state = if (quest.completed) JumpQuestState.COMPLETED else JumpQuestState.IN_PROGRESS,
+  )
+}
+
+@Composable
+private fun questLabel(id: QuestId): String = stringResource(
+  when (id) {
+    QuestId.DAILY_WORKOUT -> R.string.quest_daily_workout
+    QuestId.DAILY_JUMPS -> R.string.quest_daily_jumps
+    QuestId.WEEKLY_WORKOUTS -> R.string.quest_weekly_workouts
+    QuestId.WEEKLY_JUMPS -> R.string.quest_weekly_jumps
+  },
+)
+
+@Composable
+private fun questDescription(id: QuestId): String = stringResource(
+  when (id) {
+    QuestId.DAILY_WORKOUT -> R.string.quest_daily_workout_description
+    QuestId.DAILY_JUMPS -> R.string.quest_daily_jumps_description
+    QuestId.WEEKLY_WORKOUTS -> R.string.quest_weekly_workouts_description
+    QuestId.WEEKLY_JUMPS -> R.string.quest_weekly_jumps_description
+  },
+)
+
+@Composable
+private fun achievementLabel(id: AchievementId): String = stringResource(
+  when (id) {
+    AchievementId.FIRST_WORKOUT -> R.string.achievement_first_workout
+    AchievementId.ONE_THOUSAND_TOTAL_JUMPS -> R.string.achievement_thousand_jumps
+    AchievementId.THREE_DAY_STREAK -> R.string.achievement_three_day_streak
+    AchievementId.ONE_THOUSAND_JUMP_WORKOUT -> R.string.achievement_thousand_workout
+    AchievementId.TEN_WORKOUTS -> R.string.achievement_ten_workouts
+  },
+)
+
+private fun formatAchievementDate(epochMillis: Long, locale: Locale): String =
+  SimpleDateFormat("d MMM", locale).format(Date(epochMillis))
+
+@Composable
 private fun TrainingCalendar(days: List<TrainingDay>) {
   val weeks = days.chunked(7)
-  val labels = listOf("M", "T", "W", "T", "F", "S", "S")
+  val labels = stringArrayResource(R.array.progress_weekday_labels)
   Row(
     Modifier.fillMaxWidth().padding(vertical = 8.dp),
     horizontalArrangement = Arrangement.Center,
@@ -171,11 +328,19 @@ private fun TrainingDayCell(day: TrainingDay) {
       else -> MaterialTheme.colorScheme.primary
     }
   }
-  val date = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date(day.dayStartEpochMillis))
+  val date = SimpleDateFormat(
+    "EEE, d MMM",
+    LocalConfiguration.current.locales[0],
+  ).format(Date(day.dayStartEpochMillis))
   val description = when {
-    day.isFuture -> "$date, future date"
-    day.trained -> "$date, ${day.sessionCount} sessions, ${day.activeMillis / 60_000L} active minutes"
-    else -> "$date, no training"
+    day.isFuture -> stringResource(R.string.progress_future_date, date)
+    day.trained -> stringResource(
+      R.string.progress_trained_date,
+      date,
+      day.sessionCount,
+      day.activeMillis / 60_000L,
+    )
+    else -> stringResource(R.string.progress_no_training_date, date)
   }
   Box(
     Modifier
@@ -193,7 +358,7 @@ private fun ActivityLegend() {
     horizontalArrangement = Arrangement.End,
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Text("Less", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.progress_less), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     listOf(0.0f, 0.28f, 0.52f, 0.76f, 1f).forEachIndexed { index, alpha ->
       Box(
         Modifier
@@ -203,13 +368,14 @@ private fun ActivityLegend() {
           .background(if (index == 0) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.primary.copy(alpha = alpha)),
       )
     }
-    Text("More", Modifier.padding(start = 5.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.progress_more), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
 }
 
 @Composable
 private fun WeeklyActivityChart(weeks: List<TrainingWeek>) {
   val maxActiveMillis = weeks.maxOfOrNull { it.activeMillis }?.coerceAtLeast(1L) ?: 1L
+  val locale = LocalConfiguration.current.locales[0]
   Row(
     Modifier.fillMaxWidth().height(150.dp).padding(top = 8.dp),
     horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -234,7 +400,7 @@ private fun WeeklyActivityChart(weeks: List<TrainingWeek>) {
             )
           }
         }
-        Text(formatWeek(week.weekStartEpochMillis), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(formatWeek(week.weekStartEpochMillis, locale), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
     }
   }
@@ -248,11 +414,19 @@ private fun TrainingDay.activityLevel(): Int = when {
   else -> 4
 }
 
-private fun formatWeek(epochMillis: Long): String =
-  SimpleDateFormat("d/M", Locale.getDefault()).format(Date(epochMillis))
+private fun formatWeek(epochMillis: Long, locale: Locale): String =
+  SimpleDateFormat("d/M", locale).format(Date(epochMillis))
 
+@Composable
 private fun formatActiveTime(millis: Long): String {
   val minutes = millis / 60_000L
-  if (minutes < 60) return "${minutes}m"
-  return "${minutes / 60}h ${minutes % 60}m"
+  if (minutes < 60) return stringResource(R.string.progress_minutes, minutes)
+  return stringResource(R.string.progress_hours_minutes, minutes / 60, minutes % 60)
+}
+
+@JumpLightDarkPreviews
+@Preview(name = "1.5x font", widthDp = 390, heightDp = 884, fontScale = 1.5f, showBackground = true)
+@Composable
+private fun ProgressScreenPreview() {
+  JumpTheme { ProgressScreen(state = ProgressUiState(), onBack = {}) }
 }

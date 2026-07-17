@@ -18,8 +18,15 @@ import com.example.jump.feature.onboarding.OnboardingRoute
 @Composable
 fun JumpApp(viewModel: AppViewModel = hiltViewModel()) {
   val profile by viewModel.profile.collectAsStateWithLifecycle()
+  val welcome by viewModel.welcomeState.collectAsStateWithLifecycle()
   when {
     profile == null -> JumpScreen { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { JumpBrandMark(Modifier.size(72.dp)) } }
+    !welcome.hasEnteredApp && profile?.onboardingComplete == false -> WelcomeScreen(
+      state = welcome,
+      onContinueAsGuest = viewModel::continueAsGuest,
+      onGoogle = viewModel::signInWithGoogle,
+      onEmail = viewModel::signInWithEmail,
+    )
     profile?.onboardingComplete == false -> OnboardingRoute()
     else -> MainNavigation(viewModel)
   }

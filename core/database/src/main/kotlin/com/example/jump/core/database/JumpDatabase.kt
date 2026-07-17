@@ -4,10 +4,18 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-  entities = [WorkoutSessionEntity::class, WorkoutIntervalEntity::class],
-  version = 1,
+  entities = [
+    WorkoutSessionEntity::class,
+    WorkoutIntervalEntity::class,
+    GamificationProfileEntity::class,
+    WorkoutRewardEntity::class,
+    QuestProgressEntity::class,
+    AchievementUnlockEntity::class,
+  ],
+  version = 2,
   exportSchema = true,
 )
 abstract class JumpDatabase : RoomDatabase() {
   abstract fun workoutDao(): WorkoutDao
+  abstract fun gamificationDao(): GamificationDao
 }

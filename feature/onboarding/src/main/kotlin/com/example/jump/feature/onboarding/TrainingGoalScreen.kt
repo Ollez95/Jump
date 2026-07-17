@@ -1,8 +1,10 @@
 package com.example.jump.feature.onboarding
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.example.jump.core.designsystem.component.card.JumpCard
+import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.component.card.JumpChoiceCard
 import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
@@ -24,7 +26,7 @@ internal fun TrainingGoalScreen(
     onContinue = onContinue,
     onBack = onBack,
   ) {
-    JumpCard {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
       JumpEyebrow(stringResource(R.string.onboarding_focus))
       TrainingGoal.entries.forEach { goal ->
         JumpChoiceCard(

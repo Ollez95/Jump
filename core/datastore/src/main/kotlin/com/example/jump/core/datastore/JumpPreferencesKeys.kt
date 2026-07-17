@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 
 internal object JumpPreferencesKeys {
   val onboarding = booleanPreferencesKey("onboarding_complete")
+  val welcomeComplete = booleanPreferencesKey("welcome_complete")
   val experience = stringPreferencesKey("experience")
   val goal = stringPreferencesKey("goal")
   val frequency = intPreferencesKey("frequency")

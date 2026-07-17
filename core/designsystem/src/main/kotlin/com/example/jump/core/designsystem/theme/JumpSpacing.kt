@@ -11,4 +11,7 @@ object JumpSpacing {
   val xl = 24.dp
   val xxl = 32.dp
   val hero = 40.dp
+  val screen = 20.dp
+  val gutter = 16.dp
+  val section = 32.dp
 }

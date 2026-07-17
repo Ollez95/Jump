@@ -23,10 +23,10 @@ fun JumpDestructiveButton(
   val colors = MaterialTheme.colorScheme
   OutlinedButton(
     onClick = onClick,
-    modifier = modifier.height(52.dp),
+    modifier = modifier.height(56.dp),
     enabled = enabled,
     shape = MaterialTheme.shapes.medium,
-    border = BorderStroke(1.dp, colors.error.copy(alpha = 0.65f)),
+    border = BorderStroke(1.dp, colors.error),
     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error),
   ) {
     Text(label, style = MaterialTheme.typography.labelLarge)

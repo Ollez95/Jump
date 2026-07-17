@@ -4,9 +4,9 @@ Jump's shared visual language: Material 3 theme, design tokens, navigation chrom
 
 ## Owns
 
-- `JumpTheme`, light/dark color schemes, typography, shapes, and `JumpSpacing` tokens.
+- `JumpTheme`, Momentum Athletic light/dark color schemes, bundled Anybody/Lexend typography, shapes, and `JumpSpacing` tokens.
 - Screen structure and navigation: `JumpScreen`, `JumpTopAppBar`, `JumpNavigationBar`, and navigation item/icon models.
-- Reusable cards, buttons, selectors, settings rows, progress, statistics, banners, empty states, and brand elements.
+- Reusable cards, buttons, selectors, settings rows, progress, statistics, banners, empty states, brand elements, and reward/quest surfaces.
 - `formatDuration` and `formatDate` presentation helpers.
 
 ## Dependencies
@@ -21,7 +21,9 @@ Keep components generic and driven by parameters. Screen-specific state and busi
 
 ```bash
 ./gradlew :core:designsystem:assembleDebug
+./gradlew :core:designsystem:validateDebugScreenshotTest
 ```
 
-[Back to the module catalog](../../README.md#modules)
+See [the screenshot-testing guide](../../docs/testing.md) for updating reviewed golden images.
 
+[Back to the module catalog](../../README.md#modules)

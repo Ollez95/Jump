@@ -6,6 +6,7 @@ import com.example.jump.core.model.SessionPhase
 import com.example.jump.core.model.WorkoutInterval
 import com.example.jump.core.model.WorkoutKind
 import com.example.jump.core.model.WorkoutPlan
+import com.example.jump.core.domain.AwardWorkoutRewardsUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
@@ -13,8 +14,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class WorkoutCoordinatorTest {
+  private fun coordinator(
+    workouts: FakeWorkoutRepository = FakeWorkoutRepository(),
+    gamification: FakeGamificationRepository = FakeGamificationRepository(),
+  ) = WorkoutCoordinator(workouts, AwardWorkoutRewardsUseCase(gamification))
+
   @Test fun cameraJumpsUseTheSharedWorkoutMetricsPipeline() {
-    val coordinator = WorkoutCoordinator(FakeWorkoutRepository())
+    val coordinator = coordinator()
     val plan = WorkoutPlan("camera-test", "Camera test", "", WorkoutKind.QUICK)
     coordinator.prepare(plan, CountingMode.CAMERA, now = 0)
     coordinator.tick(1_000)
@@ -30,7 +36,7 @@ class WorkoutCoordinatorTest {
   }
 
   @Test fun pausingCameraWorkoutIsIdempotent() {
-    val coordinator = WorkoutCoordinator(FakeWorkoutRepository())
+    val coordinator = coordinator()
     coordinator.prepare(WorkoutPlan("camera-test", "Camera test", "", WorkoutKind.QUICK), CountingMode.CAMERA, now = 0)
 
     coordinator.pause()
@@ -41,7 +47,7 @@ class WorkoutCoordinatorTest {
   }
 
   @Test fun configuredWorkoutTransitionsThroughEveryJumpAndRestRound() {
-    val coordinator = WorkoutCoordinator(FakeWorkoutRepository())
+    val coordinator = coordinator()
     val plan = WorkoutPlan(
       id = "custom-test",
       title = "Custom intervals",
@@ -76,7 +82,7 @@ class WorkoutCoordinatorTest {
 
   @Test fun concurrentFinishCallsPersistOnlyOneSession() = runTest {
     val repository = FakeWorkoutRepository()
-    val coordinator = WorkoutCoordinator(repository)
+    val coordinator = coordinator(workouts = repository)
     coordinator.prepare(WorkoutPlan("finish-test", "Finish test", "", WorkoutKind.QUICK), now = 0)
 
     val ids = listOf(
@@ -87,5 +93,32 @@ class WorkoutCoordinatorTest {
     assertEquals(listOf(1L, 1L), ids)
     assertEquals(1, repository.savedSessions.size)
     assertEquals(1L, coordinator.state.value.savedSessionId)
+  }
+
+  @Test fun completedWorkoutAwardsAfterSaveAndRewardFailureDoesNotDuplicateWorkout() = runTest {
+    val workouts = FakeWorkoutRepository()
+    val gamification = FakeGamificationRepository().apply { failure = IllegalStateException("offline") }
+    val coordinator = coordinator(workouts, gamification)
+    coordinator.prepare(WorkoutPlan("reward-test", "Reward test", "", WorkoutKind.QUICK), now = 0)
+
+    val id = coordinator.finish()
+
+    assertEquals(1L, id)
+    assertEquals(1, workouts.savedSessions.size)
+    assertEquals(1L, coordinator.state.value.savedSessionId)
+  }
+
+  @Test fun correctingSavedJumpsDoesNotAwardRewardsAgain() = runTest {
+    val workouts = FakeWorkoutRepository()
+    val gamification = FakeGamificationRepository()
+    val coordinator = coordinator(workouts, gamification)
+    coordinator.prepare(WorkoutPlan("correction-test", "Correction test", "", WorkoutKind.QUICK), now = 0)
+
+    coordinator.finish()
+    coordinator.correctJumps(25)
+    coordinator.correctJumps(30)
+
+    assertEquals(listOf(1L), gamification.awardedSessionIds)
+    assertEquals(30, coordinator.state.value.correctedJumps)
   }
 }

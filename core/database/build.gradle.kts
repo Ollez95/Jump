@@ -4,7 +4,10 @@ plugins {
   alias(libs.plugins.hilt)
 }
 
-android { namespace = "com.example.jump.core.database" }
+android {
+  namespace = "com.example.jump.core.database"
+  defaultConfig { testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+}
 
 dependencies {
   implementation(project(":core:model"))
@@ -14,6 +17,11 @@ dependencies {
   ksp(libs.androidx.room.compiler)
   ksp(libs.dagger.hilt.compiler)
   testImplementation(libs.androidx.room.testing)
+  androidTestImplementation(libs.androidx.test.core)
+  androidTestImplementation(libs.androidx.test.ext.junit)
+  androidTestImplementation(libs.androidx.test.runner)
+  androidTestImplementation(libs.androidx.room.testing)
+  androidTestImplementation(libs.truth)
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }

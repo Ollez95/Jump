@@ -21,7 +21,7 @@ fun JumpPrimaryButton(
 ) {
   Button(
     onClick = onClick,
-    modifier = modifier.height(54.dp),
+    modifier = modifier.height(56.dp),
     enabled = enabled,
     shape = MaterialTheme.shapes.medium,
     contentPadding = ButtonDefaults.ContentPadding,

@@ -29,18 +29,18 @@ fun JumpHeader(
   Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(JumpSpacing.xs)) {
       eyebrow?.let { JumpEyebrow(it) }
-      Text(title, style = MaterialTheme.typography.headlineLarge)
+      Text(title, style = MaterialTheme.typography.headlineMedium)
       description?.let {
         Text(
           it,
-          style = MaterialTheme.typography.bodyLarge,
+          style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
     }
     if (brandMark) {
       Spacer(Modifier.width(JumpSpacing.md))
-      JumpBrandMark(Modifier.size(52.dp))
+      JumpBrandMark(Modifier.size(40.dp))
     }
   }
 }

@@ -1,6 +1,7 @@
 package com.example.jump.core.designsystem.component.card
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,18 +26,25 @@ fun JumpStatCard(
   highlighted: Boolean = false,
 ) {
   val colors = MaterialTheme.colorScheme
+  val contentColor = if (highlighted) colors.onPrimaryContainer else colors.onSurface
+  val supportingColor = if (highlighted) {
+    colors.onPrimaryContainer.copy(alpha = 0.76f)
+  } else {
+    colors.onSurfaceVariant
+  }
   Card(
     modifier = modifier,
-    shape = MaterialTheme.shapes.large,
+    shape = RoundedCornerShape(18.dp),
     colors = CardDefaults.cardColors(
       containerColor = if (highlighted) colors.primaryContainer else colors.surfaceContainerLow,
+      contentColor = contentColor,
     ),
     border = BorderStroke(
       1.dp,
       if (highlighted) {
         colors.primary.copy(alpha = 0.35f)
       } else {
-        colors.outlineVariant.copy(alpha = 0.55f)
+        colors.outlineVariant
       },
     ),
   ) {
@@ -47,10 +55,10 @@ fun JumpStatCard(
       Text(
         title.uppercase(),
         style = MaterialTheme.typography.labelMedium,
-        color = if (highlighted) colors.primary else colors.onSurfaceVariant,
+        color = supportingColor,
       )
-      Text(value, style = MaterialTheme.typography.headlineMedium)
-      Text(unit, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+      Text(value, style = MaterialTheme.typography.displaySmall)
+      Text(unit, style = MaterialTheme.typography.bodyMedium, color = supportingColor)
     }
   }
 }

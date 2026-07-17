@@ -20,4 +20,6 @@ dependencies {
   implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
   implementation(libs.dagger.hilt.android)
   ksp(libs.dagger.hilt.compiler)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }

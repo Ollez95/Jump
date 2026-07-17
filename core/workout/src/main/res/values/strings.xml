@@ -2,7 +2,10 @@
   <string name="workout_channel_name">Active workout</string>
   <string name="workout_channel_description">Jump count and workout controls</string>
   <string name="workout_notification_default_title">Jump workout</string>
-  <string name="workout_notification_content">%1$d jumps • %2$d per min</string>
+  <plurals name="workout_notification_content">
+    <item quantity="one">%1$d jump • %2$d per min</item>
+    <item quantity="other">%1$d jumps • %2$d per min</item>
+  </plurals>
   <string name="workout_action_resume">Resume</string>
   <string name="workout_action_pause">Pause</string>
   <string name="workout_action_finish">Finish</string>
