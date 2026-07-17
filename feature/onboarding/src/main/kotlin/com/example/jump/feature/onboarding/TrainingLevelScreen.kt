@@ -1,8 +1,10 @@
 package com.example.jump.feature.onboarding
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.example.jump.core.designsystem.component.card.JumpCard
+import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.component.card.JumpChoiceCard
 import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
@@ -22,7 +24,7 @@ internal fun TrainingLevelScreen(
     actionLabel = stringResource(R.string.action_continue),
     onContinue = onContinue,
   ) {
-    JumpCard {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
       JumpEyebrow(stringResource(R.string.onboarding_starting_point))
       ExperienceLevel.entries.forEach { level ->
         JumpChoiceCard(

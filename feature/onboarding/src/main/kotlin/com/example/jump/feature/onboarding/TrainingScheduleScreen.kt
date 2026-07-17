@@ -2,8 +2,6 @@ package com.example.jump.feature.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,7 +10,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.jump.core.designsystem.component.card.JumpCard
-import com.example.jump.core.designsystem.component.input.JumpNumberChip
+import com.example.jump.core.designsystem.component.card.JumpChoiceCard
 import com.example.jump.core.designsystem.component.layout.JumpDetailRow
 import com.example.jump.core.designsystem.component.layout.JumpEyebrow
 import com.example.jump.core.designsystem.preview.JumpLightDarkPreviews
@@ -38,25 +36,24 @@ internal fun TrainingScheduleScreen(
     onBack = onBack,
   ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-      JumpCard {
+      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         JumpEyebrow(stringResource(R.string.onboarding_weekly_rhythm))
         Text(
           stringResource(R.string.onboarding_sustainable_pace),
           style = MaterialTheme.typography.bodyLarge,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(
-          Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-          (2..6).forEach { count ->
-            JumpNumberChip(
-              value = count,
-              selected = frequency == count,
-              onClick = { onFrequencySelected(count) },
-              modifier = Modifier.weight(1f),
-            )
-          }
+        (2..6).forEach { count ->
+          JumpChoiceCard(
+            label = if (count == 6) {
+              stringResource(R.string.onboarding_frequency_six_plus)
+            } else {
+              pluralStringResource(R.plurals.sessions_per_week, count, count)
+            },
+            description = frequencyDescription(count),
+            selected = frequency == count,
+            onClick = { onFrequencySelected(count) },
+          )
         }
       }
       JumpCard(containerColor = MaterialTheme.colorScheme.primaryContainer) {
@@ -76,6 +73,17 @@ internal fun TrainingScheduleScreen(
     }
   }
 }
+
+@Composable
+private fun frequencyDescription(frequency: Int): String = stringResource(
+  when (frequency) {
+    2 -> R.string.onboarding_frequency_two_description
+    3 -> R.string.onboarding_frequency_three_description
+    4 -> R.string.onboarding_frequency_four_description
+    5 -> R.string.onboarding_frequency_five_description
+    else -> R.string.onboarding_frequency_six_description
+  },
+)
 
 @JumpLightDarkPreviews
 @Composable

@@ -11,6 +11,12 @@
     <string name="onboarding_focus">Your focus</string>
     <string name="onboarding_weekly_rhythm">Weekly rhythm</string>
     <string name="onboarding_sustainable_pace">Start with a pace you can sustain. You can change this any time from Profile.</string>
+    <string name="onboarding_frequency_six_plus">6+ sessions/week</string>
+    <string name="onboarding_frequency_two_description">A gentle start with plenty of recovery.</string>
+    <string name="onboarding_frequency_three_description">A balanced rhythm for building consistency.</string>
+    <string name="onboarding_frequency_four_description">More practice while keeping recovery days.</string>
+    <string name="onboarding_frequency_five_description">A focused routine for steady momentum.</string>
+    <string name="onboarding_frequency_six_description">A high-frequency plan for experienced jumpers.</string>
     <string name="onboarding_plan_preview">Your starting plan</string>
     <string name="onboarding_ready_title">Ready to find your rhythm</string>
     <string name="action_back">Back</string>

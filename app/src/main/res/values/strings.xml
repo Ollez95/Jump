@@ -1,4 +1,16 @@
 <resources>
+    <string name="welcome_brand">JUMP</string>
+    <string name="welcome_title">Find your rhythm.</string>
+    <string name="welcome_description">Simple jump-rope workouts, reliable tracking, and progress that stays with you.</string>
+    <string name="welcome_guest_action">Continue as guest</string>
+    <string name="welcome_google_action">Continue with Google</string>
+    <string name="welcome_email_action">Continue with email</string>
+    <string name="welcome_offline_note">Account sign-in and cloud backup are not available in this offline build. Guest workouts and progress stay fully functional on this device.</string>
+    <string name="welcome_account_unavailable_title">Account sign-in unavailable</string>
+    <string name="welcome_account_offline_error">This version works offline only. Continue as guest to start training now.</string>
+    <string name="welcome_account_rejected_error">Sign-in was cancelled. You can try again or continue as guest.</string>
+    <string name="welcome_account_generic_error">Sign-in could not be completed. Your local guest data is safe.</string>
+    <string name="welcome_privacy">By continuing, you agree to use Jump on this device. Camera workouts are processed on-device; video is never recorded or uploaded.</string>
     <string name="app_name">Jump</string>
     <string name="navigation_today">Today</string>
     <string name="navigation_history">Activity</string>
