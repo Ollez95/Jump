@@ -154,7 +154,12 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
   private fun vibrate() {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
     else @Suppress("DEPRECATION") (getSystemService(VIBRATOR_SERVICE) as Vibrator)
-    vibrator.vibrate(VibrationEffect.createOneShot(90, VibrationEffect.DEFAULT_AMPLITUDE))
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      vibrator.vibrate(VibrationEffect.createOneShot(90, VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+      @Suppress("DEPRECATION")
+      vibrator.vibrate(90)
+    }
   }
 
   private fun buildNotification(): android.app.Notification {
@@ -167,8 +172,9 @@ class WorkoutService : Service(), SensorEventListener, TextToSpeech.OnInitListen
       .setSmallIcon(android.R.drawable.ic_media_play)
       .setContentTitle(state.plan?.title ?: getString(R.string.workout_notification_default_title))
       .setContentText(
-        getString(
-          R.string.workout_notification_content,
+        resources.getQuantityString(
+          R.plurals.workout_notification_content,
+          state.detectedJumps,
           state.detectedJumps,
           state.currentPace,
         ),
